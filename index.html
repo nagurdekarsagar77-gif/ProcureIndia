@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProcureX — RFQ Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f0f3f9;--white:#fff;--dark:#0c1829;--dark2:#162644;
+  --accent:#e8390e;--gold:#f59e0b;--blue:#1e40af;--blue2:#3b82f6;
+  --green:#059669;--red:#dc2626;--purple:#7c3aed;--teal:#0891b2;
+  --sh:#e8390e;--su:#1e40af;--tr:#059669;--ff:#7c3aed;
+  --border:#e2e8f0;--text:#0f172a;--muted:#64748b;--muted2:#94a3b8;
+  --sidebar:260px;--topbar:60px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ════ LAYOUT ════ */
+.app{display:flex;height:100vh;overflow:hidden;}
+
+/* ════ SIDEBAR ════ */
+.sidebar{width:var(--sidebar);background:var(--dark);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-brand{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-logo{display:flex;align-items:center;gap:10px;}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#c42d08);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 14px rgba(232,57,14,.4);}
+.sb-logo-name{font-size:18px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.sb-logo-tag{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+
+.sb-role-card{margin:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px 14px;}
+.src-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.src-name{font-size:14px;font-weight:700;color:#fff;}
+.src-role{font-size:11px;margin-top:2px;font-weight:600;letter-spacing:.3px;}
+.src-vc{font-family:monospace;font-size:10px;background:rgba(255,255,255,.08);border-radius:5px;padding:2px 7px;margin-top:6px;display:inline-block;color:rgba(255,255,255,.5);}
+
+.sb-nav{flex:1;padding:8px 0;}
+.nav-section{margin-bottom:4px;}
+.nav-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:1.2px;padding:12px 20px 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .18s;font-size:13px;font-weight:500;color:rgba(255,255,255,.5);border-left:3px solid transparent;position:relative;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.85);}
+.nav-item.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:var(--accent);font-weight:700;}
+.nav-item .ni{font-size:16px;width:20px;text-align:center;}
+.nav-badge{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;min-width:20px;text-align:center;}
+.nav-badge.green{background:var(--green);}
+.nav-badge.blue{background:var(--blue2);}
+
+.sb-user{margin:12px;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.su-av{width:34px;height:34px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;}
+.su-n{font-size:13px;font-weight:700;color:#fff;}
+.su-r{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;}
+
+/* ════ MAIN ════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ════ TOPBAR ════ */
+.topbar{height:var(--topbar);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0;box-shadow:0 1px 8px rgba(0,0,0,.06);}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-.4px;}
+.tb-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.tb-right{display:flex;align-items:center;gap:10px;}
+.tb-btn{padding:8px 18px;border-radius:9px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;}
+.tb-btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(232,57,14,.3);}
+.tb-btn-primary:hover{background:#d62d08;transform:translateY(-1px);}
+.tb-btn-outline{background:#fff;color:var(--text);border:1.5px solid var(--border);}
+.tb-btn-outline:hover{border-color:var(--blue2);color:var(--blue);}
+.notif-wrap{position:relative;}
+.notif-bell{width:36px;height:36px;background:#f8fafc;border:1.5px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+.notif-dot{position:absolute;top:5px;right:6px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid #fff;}
+
+/* ════ CONTENT ════ */
+.content{flex:1;overflow-y:auto;padding:28px;}
+.page{display:none;}.page.active{display:block;}
+
+/* ════ ROLE SWITCHER ════ */
+.role-switcher{background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:6px;display:inline-flex;gap:5px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.rs-btn{padding:9px 20px;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);}
+.rs-btn.active{color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.15);}
+.rs-sh.active{background:var(--sh);}
+.rs-su.active{background:var(--su);}
+.rs-tr.active{background:var(--tr);}
+.rs-ff.active{background:var(--ff);}
+
+/* ════ CARDS & LAYOUT ════ */
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden;transition:all .2s;}
+.stat-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08);transform:translateY(-2px);}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sc-red::after{background:linear-gradient(90deg,var(--sh),#ff6b35);}
+.sc-blue::after{background:linear-gradient(90deg,var(--su),var(--blue2));}
+.sc-green::after{background:linear-gradient(90deg,var(--tr),#34d399);}
+.sc-purple::after{background:linear-gradient(90deg,var(--ff),#a78bfa);}
+.sc-gold::after{background:linear-gradient(90deg,var(--gold),#fcd34d);}
+.sc-teal::after{background:linear-gradient(90deg,var(--teal),#38bdf8);}
+.stat-icon{font-size:28px;margin-bottom:12px;}
+.stat-val{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;letter-spacing:-1px;}
+.stat-lbl{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px;}
+.stat-chg{font-size:11px;color:var(--green);font-weight:700;margin-top:5px;}
+
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-hd h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;letter-spacing:-.4px;}
+.section-hd a{font-size:12px;color:var(--blue2);font-weight:600;cursor:pointer;text-decoration:none;}
+
+.card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:24px;}
+.card.mb{margin-bottom:20px;}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.card-title::before{content:'';width:16px;height:2px;background:var(--accent);border-radius:2px;}
+
+/* ════ RFQ CARDS ════ */
+.rfq-list{display:flex;flex-direction:column;gap:14px;}
+.rfq-card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:0;overflow:hidden;transition:all .2s;cursor:pointer;}
+.rfq-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.09);border-color:var(--blue2);}
+.rfq-header{padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid #f1f5f9;}
+.rfq-id{font-size:11px;font-weight:700;color:var(--muted2);font-family:monospace;letter-spacing:.5px;}
+.rfq-title{font-size:16px;font-weight:700;margin-top:4px;letter-spacing:-.2px;}
+.rfq-type{display:flex;align-items:center;gap:6px;margin-top:6px;}
+.rfq-meta{display:flex;align-items:center;gap:16px;padding:12px 20px;background:#fafcff;}
+.rfq-meta-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.rfq-meta-item strong{color:var(--text);font-weight:700;}
+.rfq-footer{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f1f5f9;}
+.rfq-bids{font-size:13px;color:var(--muted);font-weight:500;}
+.rfq-bids strong{color:var(--text);}
+.rfq-timer{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;}
+.rfq-timer.urgent{color:var(--red);animation:timerPulse 1s ease-in-out infinite;}
+.rfq-timer.normal{color:var(--gold);}
+.rfq-timer.open{color:var(--green);}
+@keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ════ STATUS BADGES ════ */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;}
+.badge-draft{background:#f8fafc;color:var(--muted);border:1px solid var(--border);}
+.badge-open{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;}
+.badge-bidding{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+.badge-evaluation{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+.badge-awarded{background:#faf5ff;color:#6d28d9;border:1px solid #ddd6fe;}
+.badge-closed{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+.badge-cancelled{background:#f1f5f9;color:var(--muted);border:1px solid var(--border);}
+.badge-dot{width:6px;height:6px;border-radius:50%;}
+.bd-open{background:#16a34a;animation:pulse-g 2s infinite;}
+.bd-bidding{background:#2563eb;animation:pulse-b 2s infinite;}
+.bd-evaluation{background:#d97706;}
+.bd-awarded{background:#7c3aed;}
+.bd-closed{background:#dc2626;}
+@keyframes pulse-g{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.4)}50%{box-shadow:0 0 0 4px rgba(22,163,74,0)}}
+@keyframes pulse-b{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.4)}50%{box-shadow:0 0 0 4px rgba(37,99,235,0)}}
+
+.type-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;}
+.t-supplier{background:rgba(30,64,175,.1);color:var(--su);}
+.t-transporter{background:rgba(5,150,105,.1);color:var(--tr);}
+.t-forwarder{background:rgba(124,58,237,.1);color:var(--ff);}
+.t-all{background:rgba(232,57,14,.1);color:var(--sh);}
+
+/* ════ MODAL / DRAWER ════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px;width:100%;max-width:720px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;animation:modalIn .3s ease both;box-shadow:0 24px 64px rgba(0,0,0,.2);}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.modal-head h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:-.4px;}
+.modal-head p{font-size:13px;color:var(--muted);margin-top:4px;}
+.modal-close{width:32px;height:32px;background:#f1f5f9;border:none;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.modal-close:hover{background:#fee2e2;color:var(--red);}
+.modal-body{padding:24px 28px;overflow-y:auto;flex:1;}
+.modal-foot{padding:16px 28px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-shrink:0;background:#fafcff;}
+
+/* ════ FORM ELEMENTS ════ */
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fg label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.fg input,.fg select,.fg textarea{background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:var(--text);outline:none;transition:all .2s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue2);background:#fff;box-shadow:0 0 0 4px rgba(59,130,246,.09);}
+.fg textarea{resize:vertical;min-height:90px;}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted2);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.fc{grid-column:1/-1;}
+.req{color:var(--accent);}
+.field-hint{font-size:11px;color:var(--muted2);margin-top:4px;}
+
+.btn{padding:11px 22px;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;}
+.btn:hover{transform:translateY(-1px);}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 14px rgba(232,57,14,.3);}
+.btn-blue{background:var(--blue);color:#fff;box-shadow:0 4px 14px rgba(30,64,175,.3);}
+.btn-green{background:var(--green);color:#fff;box-shadow:0 4px 14px rgba(5,150,105,.3);}
+.btn-ghost{background:#f8fafc;color:var(--text);border:1.5px solid var(--border);}
+.btn-ghost:hover{border-color:var(--blue2);}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:12px;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;box-shadow:0 4px 14px rgba(245,158,11,.3);}
+
+/* ════ BID TABLE ════ */
+.bid-table{width:100%;border-collapse:collapse;}
+.bid-table th{background:#f8fafc;padding:11px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border);}
+.bid-table td{padding:13px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;vertical-align:middle;}
+.bid-table tr:last-child td{border-bottom:none;}
+.bid-table tr:hover td{background:#fafcff;}
+.bid-table .best-bid td{background:#f0fdf4;}
+.bid-rank{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
+.rank-1{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.rank-2{background:#94a3b8;}
+.rank-3{background:#cd7c2e;}
+.rank-n{background:#e2e8f0;color:var(--muted);}
+
+/* ════ TIMELINE ════ */
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-item:not(:last-child)::after{content:'';position:absolute;left:16px;top:32px;bottom:0;width:2px;background:var(--border);}
+.tl-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:2px solid var(--border);background:#fff;}
+.tl-dot.done{background:var(--green);border-color:var(--green);}
+.tl-dot.active{background:var(--blue);border-color:var(--blue);animation:pulse-b 2s infinite;}
+.tl-dot.pending{background:#f8fafc;}
+.tl-body{flex:1;}
+.tl-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+.tl-sub{font-size:12px;color:var(--muted);}
+.tl-time{font-size:11px;color:var(--muted2);margin-top:3px;}
+
+/* ════ CONDITION CHIPS ════ */
+.conditions-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.cond-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;background:#f8fafc;border:1.5px solid var(--border);}
+.cond-chip .cc-icon{font-size:14px;}
+.cond-chip.filled{background:#eff6ff;border-color:#bfdbfe;color:var(--blue);}
+
+/* ════ NOTIFICATIONS PANEL ════ */
+.notif-panel{background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;}
+.notif-item{padding:14px 18px;border-bottom:1px solid #f1f5f9;display:flex;gap:12px;transition:background .15s;cursor:pointer;}
+.notif-item:hover{background:#fafcff;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item.unread{background:#fffbeb;}
+.ni-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ni-body{flex:1;}
+.ni-title{font-size:13px;font-weight:700;margin-bottom:2px;}
+.ni-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+.ni-time{font-size:11px;color:var(--muted2);margin-top:3px;}
+
+/* ════ PROGRESS ════ */
+.prog-bar{background:#f1f5f9;border-radius:20px;height:8px;overflow:hidden;margin-top:8px;}
+.prog-fill{height:100%;border-radius:20px;transition:width .5s ease;}
+
+/* ════ AWARD SECTION ════ */
+.award-card{background:linear-gradient(135deg,#1e3a6e,#0c1829);border-radius:16px;padding:24px;color:#fff;margin-bottom:16px;}
+.ac-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.ac-vendor{font-size:20px;font-weight:800;margin-bottom:4px;}
+.ac-amount{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold);}
+.ac-meta{display:flex;gap:20px;margin-top:14px;}
+.ac-meta-item{font-size:12px;color:rgba(255,255,255,.55);}
+.ac-meta-item strong{color:rgba(255,255,255,.9);display:block;font-size:13px;font-weight:700;margin-top:2px;}
+
+/* ════ EMPTY STATE ════ */
+.empty{text-align:center;padding:48px 24px;}
+.empty-icon{font-size:52px;margin-bottom:16px;}
+.empty-title{font-size:18px;font-weight:700;margin-bottom:8px;}
+.empty-sub{font-size:13px;color:var(--muted);line-height:1.7;max-width:320px;margin:0 auto 20px;}
+
+/* ════ TABS ════ */
+.tab-row{display:flex;gap:2px;background:#f1f5f9;border-radius:12px;padding:3px;margin-bottom:22px;}
+.tab{flex:1;padding:9px;border:none;border-radius:10px;background:transparent;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .18s;text-align:center;}
+.tab.active{background:#fff;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.08);}
+
+/* ════ VENDOR VIEW ════ */
+.bid-form-card{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid var(--blue2);border-radius:16px;padding:22px;margin-bottom:20px;}
+.bfc-title{font-size:15px;font-weight:700;margin-bottom:4px;}
+.bfc-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.bid-input-row{display:flex;gap:10px;align-items:flex-end;}
+.bid-input-row .fg{flex:1;margin-bottom:0;}
+.bid-submit{flex-shrink:0;}
+
+/* ════ COUNTDOWN TIMER ════ */
+.countdown{display:inline-flex;gap:6px;align-items:center;}
+.cd-block{background:#0f172a;color:#fff;border-radius:7px;padding:6px 10px;text-align:center;min-width:44px;}
+.cd-val{font-size:18px;font-weight:800;line-height:1;font-family:'Playfair Display',serif;}
+.cd-lbl{font-size:9px;color:rgba(255,255,255,.45);margin-top:2px;text-transform:uppercase;letter-spacing:.8px;}
+.cd-sep{font-size:20px;font-weight:800;color:var(--red);animation:blink2 1s infinite;}
+@keyframes blink2{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ════ FILTER BAR ════ */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.filter-select{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;cursor:pointer;}
+.search-input{background:#fff;border:1.5px solid var(--border);border-radius:9px;padding:8px 14px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--text);outline:none;width:220px;}
+.search-input:focus{border-color:var(--blue2);}
+
+/* ════ MISC ════ */
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.text-muted{color:var(--muted);}
+.text-sm{font-size:12px;}
+.fw7{font-weight:700;}
+.flex-center{display:flex;align-items:center;gap:8px;}
+.ml-auto{margin-left:auto;}
+.tag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11px;font-weight:600;}
+.tag-blue{background:#eff6ff;color:#1d4ed8;}
+.tag-green{background:#f0fdf4;color:#166534;}
+.tag-red{background:#fef2f2;color:#991b1b;}
+.tag-gold{background:#fffbeb;color:#92400e;}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;}
+.info-row:last-child{border-bottom:none;}
+.ir-lbl{font-size:12px;color:var(--muted);font-weight:600;}
+.ir-val{font-size:13px;font-weight:700;}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all .3s;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.28);max-width:380px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ts{border-left:4px solid var(--green);}
+.toast.te{border-left:4px solid var(--red);}
+.toast.ti{border-left:4px solid var(--blue2);}
+
+.ov{position:fixed;inset:0;background:rgba(255,255,255,.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:8000;flex-direction:column;gap:12px;}
+.ov.show{display:flex;}
+.spin{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--blue2);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){.sidebar{display:none;}.g3{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.g2,.g3{grid-template-columns:1fr;}.content{padding:16px;}}
+
+/* ══════ AUTH SCREEN ══════ */
+.auth-scr{display:flex;min-height:100vh;position:fixed;inset:0;z-index:9000;background:var(--bg);}
+.auth-scr.hidden{display:none;}
+.auth-brand{width:400px;flex-shrink:0;background:var(--dark);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.auth-brand::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-48deg,rgba(255,255,255,.01) 0,rgba(255,255,255,.01) 1px,transparent 1px,transparent 28px);z-index:1;}
+.agl{position:absolute;border-radius:50%;filter:blur(80px);}
+.agl1{width:460px;height:460px;background:rgba(232,57,14,.15);top:-140px;left:-110px;}
+.agl2{width:300px;height:300px;background:rgba(124,58,237,.13);bottom:-50px;right:-50px;}
+.abi{position:relative;z-index:2;padding:40px 44px;display:flex;flex-direction:column;height:100%;}
+.ab-logo{display:flex;align-items:center;gap:11px;margin-bottom:48px;}
+.ab-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--sh),#b82c09);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 8px 22px rgba(232,57,14,.4);}
+.ab-name{font-weight:800;font-size:22px;color:#fff;letter-spacing:-.4px;}
+.ab-tag{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:1.8px;text-transform:uppercase;margin-top:2px;}
+.live-pill{display:inline-flex;align-items:center;gap:6px;background:rgba(232,57,14,.12);border:1px solid rgba(232,57,14,.24);border-radius:30px;padding:5px 12px;font-size:10px;font-weight:700;color:#ff7b57;letter-spacing:1.3px;text-transform:uppercase;margin-bottom:15px;width:max-content;}
+.lpdot{width:6px;height:6px;border-radius:50%;background:#ff7b57;animation:lpb 2s ease-in-out infinite;}
+@keyframes lpb{0%,100%{opacity:1}50%{opacity:.2}}
+.ab-h1{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;line-height:1.08;color:#fff;letter-spacing:-1.4px;margin-bottom:13px;}
+.ab-h1 em{font-style:italic;color:var(--gold);}
+.ab-p{font-size:13px;line-height:1.88;color:rgba(255,255,255,.36);max-width:288px;margin-bottom:32px;}
+.ab-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.07);border-radius:13px;overflow:hidden;margin-bottom:24px;}
+.ab-k{background:rgba(255,255,255,.03);padding:16px 10px;text-align:center;}
+.ab-kv{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff;}
+.ab-kv span{color:var(--gold);}
+.ab-kl{font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.9px;margin-top:3px;font-weight:600;}
+.ab-roles{display:flex;flex-direction:column;gap:7px;margin-top:auto;}
+.ab-role{display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(255,255,255,.032);border:1px solid rgba(255,255,255,.06);border-radius:9px;}
+.ab-rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ab-rn{font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;}
+.ab-rd{font-size:10px;color:rgba(255,255,255,.28);margin-top:2px;}
+
+.auth-right{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;background:#f0f3f9;}
+.auth-pills{display:flex;background:#fff;border:1.5px solid #e2e8f0;border-radius:14px;padding:4px;gap:4px;margin-bottom:22px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.auth-pill{padding:10px 32px;border:none;border-radius:10px;background:transparent;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:#64748b;cursor:pointer;transition:all .2s;}
+.auth-pill.on{background:var(--dark);color:#fff;box-shadow:0 4px 14px rgba(12,24,41,.25);}
+.acard{width:100%;max-width:490px;background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:32px 34px;box-shadow:0 10px 44px rgba(0,0,0,.07);}
+.acard.scroll{max-height:82vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#e2e8f0 transparent;}
+.apanel{display:none;}.apanel.on{display:block;animation:aup .35s ease both;}
+@keyframes aup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.aeyebrow{font-size:10px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase;color:#64748b;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.aeyebrow::before{content:'';width:20px;height:2px;background:var(--sh);border-radius:2px;display:inline-block;}
+.atitle{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:-.7px;margin-bottom:4px;}
+.asub{font-size:13px;color:#64748b;margin-bottom:22px;line-height:1.65;}
+.rtabs2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:20px;}
+.rtab2{border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:12px 7px;text-align:center;cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
+.rtab2:hover{transform:translateY(-2px);}
+.rtab2 .rico2{height:28px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:22px;}
+.rtab2 .rlbl2{font-size:11.5px;font-weight:700;color:#64748b;}
+.rtab2.on[data-r=shipper]{border-color:var(--sh);background:rgba(232,57,14,.05);}.rtab2.on[data-r=shipper] .rlbl2{color:var(--sh);}
+.rtab2.on[data-r=supplier]{border-color:var(--su);background:rgba(30,64,175,.05);}.rtab2.on[data-r=supplier] .rlbl2{color:var(--su);}
+.rtab2.on[data-r=transporter]{border-color:var(--tr);background:rgba(5,150,105,.05);}.rtab2.on[data-r=transporter] .rlbl2{color:var(--tr);}
+.rtab2.on[data-r=forwarder]{border-color:var(--ff);background:rgba(124,58,237,.05);}.rtab2.on[data-r=forwarder] .rlbl2{color:var(--ff);}
+.surtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:18px;}
+.surole{border:1.5px solid #e2e8f0;background:#f8fafc;border-radius:10px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .18s;font-family:'Outfit',sans-serif;}
+.surole:hover{transform:translateY(-2px);}
+.surole .suico{height:26px;display:flex;align-items:center;justify-content:center;gap:2px;margin-bottom:4px;font-size:18px;}
+.surole .sunm{font-size:10px;font-weight:700;color:#64748b;}
+.surole.on[data-sr=shipper]{border-color:var(--sh);background:rgba(232,57,14,.05);}.surole.on[data-sr=shipper] .sunm{color:var(--sh);}
+.surole.on[data-sr=supplier]{border-color:var(--su);background:rgba(30,64,175,.05);}.surole.on[data-sr=supplier] .sunm{color:var(--su);}
+.surole.on[data-sr=transporter]{border-color:var(--tr);background:rgba(5,150,105,.05);}.surole.on[data-sr=transporter] .sunm{color:var(--tr);}
+.surole.on[data-sr=forwarder]{border-color:var(--ff);background:rgba(124,58,237,.05);}.surole.on[data-sr=forwarder] .sunm{color:var(--ff);}
+
+/* PHONE ROW — FIXED: unified border, no double borders */
+.ph-row{display:flex;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;transition:border-color .2s,box-shadow .2s;}
+.ph-row:focus-within{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 4px rgba(59,130,246,.09);}
+.cc-sel{width:90px;flex-shrink:0;border:none;border-right:1.5px solid #e2e8f0;background:transparent;padding:12px 8px 12px 11px;font-family:'Outfit',sans-serif;font-size:13px;color:var(--su);font-weight:700;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;}
+.ph-in{flex:1;border:none;background:transparent;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;}
+.ph-in::placeholder{color:#94a3b8;}
+.afg{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;}
+.afg label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.7px;}
+.afg input,.afg select,.afg textarea{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;}
+.afg input:focus,.afg select:focus,.afg textarea:focus{border-color:#3b82f6;background:#fff;box-shadow:0 0 0 4px rgba(59,130,246,.09);}
+.afg textarea{resize:vertical;min-height:72px;}
+.ag2{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.afc{grid-column:1/-1;}
+.asechead{font-size:10.5px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.8px;padding:9px 0 6px;border-top:1px solid #e2e8f0;margin-top:4px;margin-bottom:8px;}
+.asechead:first-of-type{border-top:none;padding-top:0;}
+.areq{color:var(--sh);}
+.amsg{padding:10px 13px;border-radius:9px;font-size:12.5px;font-weight:600;margin-bottom:12px;display:none;}
+.amsg.on{display:block;}
+.amerr{background:#fff1f0;border:1.5px solid #fca5a5;color:#b91c1c;}
+.amok{background:#f0fdf4;border:1.5px solid #86efac;color:#166534;}
+.apw-w{position:relative;}
+.apw-w input{padding-right:44px;}
+.aeye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:#94a3b8;cursor:pointer;font-size:15px;}
+.aeye:hover{color:var(--blue);}
+.ameta{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.achkl{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;color:#64748b;}
+.achkl input{width:15px;height:15px;accent-color:var(--blue);}
+.afl{font-size:13px;color:var(--blue2);font-weight:600;text-decoration:none;}
+.abtn{width:100%;padding:13px;border:none;border-radius:11px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.1px;}
+.abtn:hover{transform:translateY(-2px);}
+.absh{background:linear-gradient(135deg,#e8390e,#b82c09);color:#fff;box-shadow:0 6px 18px rgba(232,57,14,.3);}
+.absu{background:linear-gradient(135deg,#1e40af,#0f3090);color:#fff;box-shadow:0 6px 18px rgba(30,64,175,.3);}
+.abtr{background:linear-gradient(135deg,#059669,#047857);color:#fff;box-shadow:0 6px 18px rgba(5,150,105,.3);}
+.abff{background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;box-shadow:0 6px 18px rgba(124,58,237,.3);}
+.adivhr{display:flex;align-items:center;gap:9px;margin:12px 0;color:#94a3b8;font-size:12px;}
+.adivhr::before,.adivhr::after{content:'';flex:1;height:1px;background:#e2e8f0;}
+.aotpbtn{width:100%;padding:12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;color:#0f172a;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .18s;}
+.aotpbtn:hover{border-color:#3b82f6;color:var(--blue);}
+.assec{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:11px;font-size:11px;color:#94a3b8;}
+.assdot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.aswrow{margin-top:13px;padding-top:13px;border-top:1px solid #e2e8f0;text-align:center;font-size:13px;color:#64748b;}
+.aswrow a{color:var(--blue2);font-weight:700;text-decoration:none;cursor:pointer;}
+.aterms{font-size:11.5px;color:#64748b;text-align:center;line-height:1.7;margin-top:11px;}
+.aterms a{color:var(--blue2);text-decoration:none;font-weight:600;}
+.adb{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #e2e8f0;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px;z-index:9999;box-shadow:0 2px 10px rgba(0,0,0,.09);transition:opacity .3s;}
+.adot{width:7px;height:7px;border-radius:50%;background:#d1d5db;}
+.adot.ok{background:var(--green);box-shadow:0 0 0 2px rgba(5,150,105,.2);}
+.aov{position:fixed;inset:0;background:rgba(255,255,255,.75);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9500;flex-direction:column;gap:12px;}
+.aov.show{display:flex;}
+@media(max-width:860px){.auth-brand{display:none;}}
+@media(max-width:640px){.acard{padding:22px 18px;}.surtabs{grid-template-columns:1fr 1fr;}.ag2{grid-template-columns:1fr;}}
+
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"><span id="tmsg"></span></div>
+<div class="ov" id="ov"><div class="spin"></div><p style="font-size:13px;font-weight:600;color:var(--muted);">Processing…</p></div>
+
+<!-- Modal: Create RFQ -->
+<div class="modal-overlay" id="createRFQModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2>Create New RFQ</h2>
+        <p>Fill in all details — RFQ will be broadcast to selected vendors once published</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('createRFQModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tab-row" id="rfqFormTabs">
+        <button class="tab active" onclick="rfqTab(0,this)">📋 Basic Info</button>
+        <button class="tab" onclick="rfqTab(1,this)">🎯 Vendors & Scope</button>
+        <button class="tab" onclick="rfqTab(2,this)">⏱ Bid Rules</button>
+        <button class="tab" onclick="rfqTab(3,this)">📜 T&C</button>
+      </div>
+
+      <!-- Tab 0: Basic Info -->
+      <div class="rfq-tab-panel active" id="rfqtp0">
+        <div class="g2">
+          <div class="fg fc">
+            <label>RFQ Title / Description <span class="req">*</span></label>
+            <input type="text" id="rfq-title" placeholder="e.g. Bulk Cement Supply — Mumbai to Pune, 500MT">
+          </div>
+          <div class="fg">
+            <label>Cargo / Material Type <span class="req">*</span></label>
+            <select id="rfq-cargo">
+              <option value="" disabled selected>Select type</option>
+              <option>Raw Materials</option><option>Finished Goods</option><option>Chemicals</option>
+              <option>Machinery & Equipment</option><option>FMCG</option><option>Perishables</option>
+              <option>Hazardous Goods</option><option>Construction Materials</option><option>Auto Parts</option><option>Textiles</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Freight Mode <span class="req">*</span></label>
+            <select id="rfq-mode">
+              <option value="" disabled selected>Select mode</option>
+              <option>Road (FTL)</option><option>Road (LTL/Part Load)</option>
+              <option>Sea (FCL)</option><option>Sea (LCL)</option>
+              <option>Air Freight</option><option>Rail Freight</option><option>Multi-Modal</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Quantity / Volume <span class="req">*</span></label>
+            <input type="text" id="rfq-qty" placeholder="e.g. 500 MT or 20 FEU Containers">
+          </div>
+          <div class="fg">
+            <label>Origin / Loading Port <span class="req">*</span></label>
+            <input type="text" id="rfq-origin" placeholder="e.g. Nhava Sheva, Mumbai">
+          </div>
+          <div class="fg">
+            <label>Destination / Discharge Port <span class="req">*</span></label>
+            <input type="text" id="rfq-dest" placeholder="e.g. Mundra Port, Gujarat">
+          </div>
+          <div class="fg">
+            <label>Required Delivery Date <span class="req">*</span></label>
+            <input type="date" id="rfq-delivery">
+          </div>
+          <div class="fg">
+            <label>Budget / Target Rate (₹)</label>
+            <input type="number" id="rfq-budget" placeholder="e.g. 85000 (per MT or trip)">
+          </div>
+          <div class="fg fc">
+            <label>Cargo Specifications / Remarks</label>
+            <textarea id="rfq-specs" placeholder="Packing details, temperature requirements, special handling, insurance requirements, etc."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 1: Vendors & Scope -->
+      <div class="rfq-tab-panel" id="rfqtp1" style="display:none;">
+        <div class="fg">
+          <label>Broadcast To <span class="req">*</span></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:10px;padding:14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;" id="vt-supplier">
+              <input type="checkbox" id="v-supplier" style="accent-color:var(--su);width:16px;height:16px;" checked> 🏭 Suppliers
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;padding:14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;" id="vt-transporter">
+              <input type="checkbox" id="v-transporter" style="accent-color:var(--tr);width:16px;height:16px;" checked> 🚛 Transporters
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;padding:14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;" id="vt-forwarder">
+              <input type="checkbox" id="v-forwarder" style="accent-color:var(--ff);width:16px;height:16px;" checked>
+              <span style="display:flex;align-items:center;gap:4px;">
+                <svg width="14" height="14" viewBox="0 0 48 48" fill="none"><rect x="8" y="24" width="32" height="10" rx="2" fill="#2a5298" stroke="#4a90d9" stroke-width="2"/><path d="M4 36 Q12 32 24 36 Q36 40 44 36" stroke="#4a90d9" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+                <svg width="12" height="12" viewBox="0 0 48 48" fill="none"><path d="M6 26L18 22L28 38L33 36L26 20L38 16C40.5 15.2 42 13 42 11C42 9 40 7 38 7C36 7 34 8.5 33.2 11L17 18L10 6L5 8L12 22L6 26Z" fill="#7c3aed"/></svg>
+                Freight Forwarders
+              </span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;padding:14px;background:#f8fafc;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;">
+              <input type="checkbox" id="v-private" style="accent-color:var(--text);width:16px;height:16px;"> 🔒 Private / Invited Only
+            </label>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Vendor Eligibility Criteria</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="c-gst"> GST Registered vendors only</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="c-iso"> ISO Certified preferred</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="c-exp"> Minimum 3 years experience</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="c-rating"> Minimum 4★ platform rating</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="c-ins"> Cargo insurance mandatory</label>
+          </div>
+        </div>
+        <div class="fg">
+          <label>Geographic Restriction</label>
+          <select id="rfq-geo">
+            <option value="">No restriction — All India</option>
+            <option>Maharashtra only</option><option>Gujarat only</option><option>North India</option><option>South India</option><option>Pan India + SAARC</option><option>International</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Invite Specific Vendor Codes (Optional)</label>
+          <input type="text" id="rfq-invite" placeholder="e.g. VND-001, TRP-043, FF-012 (comma separated)">
+          <div class="field-hint">These vendors will receive a direct private invite in addition to public broadcast</div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Bid Rules -->
+      <div class="rfq-tab-panel" id="rfqtp2" style="display:none;">
+        <div class="g2">
+          <div class="fg">
+            <label>Bid Opening Date & Time <span class="req">*</span></label>
+            <input type="datetime-local" id="rfq-open">
+          </div>
+          <div class="fg">
+            <label>Bid Closing Date & Time <span class="req">*</span></label>
+            <input type="datetime-local" id="rfq-close">
+          </div>
+          <div class="fg">
+            <label>Bid Validity Period</label>
+            <select id="rfq-validity">
+              <option>15 days after award</option><option>30 days after award</option>
+              <option>45 days after award</option><option>60 days after award</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Evaluation Criteria</label>
+            <select id="rfq-eval">
+              <option>Lowest Price (L1)</option>
+              <option>Lowest Price + Quality Score</option>
+              <option>Best Value (Price + Experience + Rating)</option>
+              <option>Technical + Commercial (Weighted)</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Auction Type</label>
+            <select id="rfq-auction">
+              <option>Sealed Bid (One-Time)</option>
+              <option>Reverse Auction (Multiple Rounds)</option>
+              <option>Open Dutch Auction</option>
+              <option>Best of 3 Rounds</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Bid Currency</label>
+            <select id="rfq-currency"><option>INR (₹)</option><option>USD ($)</option><option>EUR (€)</option><option>AED (د.إ)</option></select>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Additional Bid Conditions</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="bc-counter"> Allow counter-offers / negotiation</label>
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="bc-partial"> Allow partial quantity bids</label>
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="bc-rebid"> Allow re-bidding (vendor can revise their bid)</label>
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="bc-anon"> Anonymous bidding (hide vendor names)</label>
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" checked id="bc-auto"> Auto-notification to all bidders on award</label>
+          <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" id="bc-ext"> Allow deadline extension (max 1 time)</label>
+        </div>
+        <div class="divider"></div>
+        <div class="fg">
+          <label>Minimum Bid Decrement (for Reverse Auction)</label>
+          <input type="text" id="rfq-decrement" placeholder="e.g. ₹500 or 1%">
+        </div>
+        <div class="fg">
+          <label>Earnest Money Deposit (EMD)</label>
+          <input type="text" id="rfq-emd" placeholder="e.g. ₹10,000 (leave blank if not required)">
+        </div>
+      </div>
+
+      <!-- Tab 3: T&C -->
+      <div class="rfq-tab-panel" id="rfqtp3" style="display:none;">
+        <div class="fg">
+          <label>Payment Terms <span class="req">*</span></label>
+          <select id="rfq-payment">
+            <option>30% Advance + 70% on Delivery</option>
+            <option>100% on Delivery</option>
+            <option>Net 30 Days from Invoice</option>
+            <option>Net 45 Days from Invoice</option>
+            <option>Net 60 Days from Invoice</option>
+            <option>LC (Letter of Credit)</option>
+            <option>Against Documents</option>
+          </select>
+        </div>
+        <div class="g2">
+          <div class="fg">
+            <label>Penalty for Delay</label>
+            <input type="text" id="rfq-penalty" placeholder="e.g. 0.5% per day (max 5%)">
+          </div>
+          <div class="fg">
+            <label>Contract Duration</label>
+            <input type="text" id="rfq-contract" placeholder="e.g. One-time or 12 months">
+          </div>
+        </div>
+        <div class="fg">
+          <label>Special Conditions / Instructions</label>
+          <textarea id="rfq-tnc" placeholder="1. All rates to be inclusive of GST&#10;2. Loading/unloading charges extra&#10;3. Vendor must have valid permit for hazardous goods&#10;4. Inspection clause applies&#10;5. Arbitration: Mumbai jurisdiction"></textarea>
+        </div>
+        <div class="fg">
+          <label>Required Documents from Vendor</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" checked> GST Certificate</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;" checked> PAN Card</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;"> Insurance Certificate</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;"> Experience Certificate</label>
+            <label class="flex-center" style="font-size:13px;gap:8px;cursor:pointer;"><input type="checkbox" style="accent-color:var(--blue);width:15px;height:15px;"> Rate Justification Sheet</label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('createRFQModal')">Cancel</button>
+      <button class="btn btn-ghost" onclick="saveRFQDraft()">💾 Save Draft</button>
+      <button class="btn btn-primary" onclick="publishRFQ()">📤 Publish RFQ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: RFQ Detail -->
+<div class="modal-overlay" id="rfqDetailModal">
+  <div class="modal" style="max-width:860px;">
+    <div class="modal-head">
+      <div>
+        <h2 id="dm-title">RFQ Details</h2>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px;" id="dm-badges"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal('rfqDetailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="dm-body"></div>
+    <div class="modal-foot" id="dm-foot"></div>
+  </div>
+</div>
+
+<!-- Modal: Place Bid -->
+<div class="modal-overlay" id="bidModal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head">
+      <div><h2>Place Your Bid</h2><p id="bm-rfq-title" style="font-size:13px;color:var(--muted);"></p></div>
+      <button class="modal-close" onclick="closeModal('bidModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="award-card" style="background:linear-gradient(135deg,#1e3a6e,#162644);margin-bottom:20px;">
+        <div class="ac-label">Bid Deadline</div>
+        <div id="bm-countdown" style="margin-top:6px;"></div>
+      </div>
+      <div class="fg"><label>Your Bid Amount (₹) <span class="req">*</span></label><input type="number" id="bid-amount" placeholder="Enter your competitive rate"></div>
+      <div class="g2">
+        <div class="fg"><label>Transit Time <span class="req">*</span></label><input type="text" id="bid-transit" placeholder="e.g. 3-4 days"></div>
+        <div class="fg"><label>Your Rating</label><div style="font-size:24px;padding-top:6px;">⭐⭐⭐⭐⭐</div></div>
+      </div>
+      <div class="fg"><label>Valid Until</label><input type="date" id="bid-valid"></div>
+      <div class="fg"><label>Technical Remarks / Differentiators</label><textarea id="bid-remarks" placeholder="What makes your bid better? Fleet size, experience, insurance coverage, track record..."></textarea></div>
+      <div class="fg"><label>Counter Conditions (if any)</label><input type="text" id="bid-counter" placeholder="e.g. Loading charges separate, toll extra"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('bidModal')">Cancel</button>
+      <button class="btn btn-blue" onclick="submitBid()">🎯 Submit Bid</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ DB INDICATOR ════ -->
+<div class="adb" id="adb"><div class="adot" id="adot"></div><span id="adbtxt">Connecting…</span></div>
+
+<!-- ════ AUTH LOADING OVERLAY ════ -->
+<div class="aov" id="aov"><div class="spin"></div><p style="font-size:13px;font-weight:600;color:var(--muted)" id="aovtxt">Please wait…</p></div>
+
+<!-- ════════════ AUTH SCREEN ════════════ -->
+<div class="auth-scr" id="authScr">
+  <div class="auth-brand">
+    <div class="agl agl1"></div><div class="agl agl2"></div>
+    <div class="abi">
+      <div class="ab-logo"><div class="ab-icon">⚙️</div><div><div class="ab-name">ProcureX</div><div class="ab-tag">RFQ Platform</div></div></div>
+      <div class="live-pill"><div class="lpdot"></div>Live</div>
+      <h1 class="ab-h1">Procure.<br>Ship.<br><em>Succeed.</em></h1>
+      <p class="ab-p">India's unified e-procurement platform — complete RFQ flow, sealed bidding, reverse auctions & real-time supply chain visibility.</p>
+      <div class="ab-kpi">
+        <div class="ab-k"><div class="ab-kv">18<span>K+</span></div><div class="ab-kl">Vendors</div></div>
+        <div class="ab-k"><div class="ab-kv">₹6<span>B</span></div><div class="ab-kl">GMV</div></div>
+        <div class="ab-k"><div class="ab-kv">99<span>%</span></div><div class="ab-kl">Uptime</div></div>
+      </div>
+      <div class="ab-roles">
+        <div class="ab-role"><div class="ab-rdot" style="background:#e8390e"></div><div><div class="ab-rn" style="color:#ff7b57">📦 Shipper</div><div class="ab-rd">Create RFQs · Set bid rules · Award contracts</div></div></div>
+        <div class="ab-role"><div class="ab-rdot" style="background:#1e40af"></div><div><div class="ab-rn" style="color:#7da0ff">🏭 Supplier</div><div class="ab-rd">Bid on material RFQs · Manage purchase orders</div></div></div>
+        <div class="ab-role"><div class="ab-rdot" style="background:#059669"></div><div><div class="ab-rn" style="color:#34d399">🚛 Transporter</div><div class="ab-rd">Bid on freight loads · Manage fleet & trips</div></div></div>
+        <div class="ab-role"><div class="ab-rdot" style="background:#7c3aed"></div><div><div class="ab-rn" style="color:#c4b5fd">✈️ Freight Forwarder</div><div class="ab-rd">Sea & air cargo · Customs clearance</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="auth-right">
+    <div class="auth-pills">
+      <button class="auth-pill on" onclick="swAuth('si')">Sign In</button>
+      <button class="auth-pill" onclick="swAuth('su')">Sign Up</button>
+    </div>
+
+    <!-- SIGN IN PANEL -->
+    <div class="acard apanel on" id="siCard">
+      <div class="aeyebrow">E-Procurement Portal</div>
+      <h2 class="atitle">Welcome Back</h2>
+      <p class="asub">Select your role and sign in to your dashboard</p>
+      <div class="amsg amerr" id="siErr"></div>
+      <div class="rtabs2" id="siTabs">
+        <div class="rtab2 on" data-r="shipper" onclick="siRole(this)"><div class="rico2">📦</div><div class="rlbl2">Shipper</div></div>
+        <div class="rtab2" data-r="supplier" onclick="siRole(this)"><div class="rico2">🏭</div><div class="rlbl2">Supplier</div></div>
+        <div class="rtab2" data-r="transporter" onclick="siRole(this)"><div class="rico2">🚛</div><div class="rlbl2">Transporter</div></div>
+        <div class="rtab2" data-r="forwarder" onclick="siRole(this)"><div class="rico2">✈️</div><div class="rlbl2">Frt. Forwarder</div></div>
+      </div>
+      <!-- FIXED PHONE ROW -->
+      <div class="afg">
+        <label>Mobile / Email <span class="areq">*</span></label>
+        <div class="ph-row">
+          <select class="cc-sel" id="siCc"><option value="+91">🇮🇳 +91</option><option value="+1">🇺🇸 +1</option><option value="+971">🇦🇪 +971</option><option value="+44">🇬🇧 +44</option></select>
+          <input class="ph-in" type="text" id="siMob" placeholder="Mobile number or email">
+        </div>
+      </div>
+      <div class="afg"><label>Vendor Code <span class="areq">*</span></label><input type="text" id="siVc" placeholder="e.g. SHP-2024-001" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+      <div class="afg"><label>Password <span class="areq">*</span></label><div class="apw-w"><input type="password" id="siPw" placeholder="Enter password" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 44px 12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"><button class="aeye" onclick="atpw('siPw',this)">👁</button></div></div>
+      <div class="ameta"><label class="achkl"><input type="checkbox"><span>Keep me signed in</span></label><a href="#" class="afl">Forgot password?</a></div>
+      <button class="abtn absh" id="siBtn" onclick="doSignIn()">Sign In as Shipper →</button>
+      <div class="adivhr">or</div>
+      <button class="aotpbtn" onclick="showToast('📲 OTP sent to your registered mobile!','ts')">📱 &nbsp;Login with OTP</button>
+      <div class="assec"><div class="assdot"></div>256-bit SSL · SOC 2 · ISO 27001</div>
+      <div class="aswrow">New to ProcureX? <a onclick="swAuth('su')">Create account →</a></div>
+    </div>
+
+    <!-- SIGN UP PANEL -->
+    <div class="acard scroll apanel" id="suCard">
+      <div class="aeyebrow">New Vendor Registration</div>
+      <h2 class="atitle">Create Account</h2>
+      <p class="asub">Securely stored — unique Vendor Code &amp; Email required</p>
+      <div class="amsg amerr" id="suErr"></div>
+      <div class="amsg amok" id="suOk"></div>
+      <div class="surtabs" id="suTabs">
+        <div class="surole on" data-sr="shipper" onclick="suRole(this)"><div class="suico">📦</div><div class="sunm">Shipper</div></div>
+        <div class="surole" data-sr="supplier" onclick="suRole(this)"><div class="suico">🏭</div><div class="sunm">Supplier</div></div>
+        <div class="surole" data-sr="transporter" onclick="suRole(this)"><div class="suico">🚛</div><div class="sunm">Transporter</div></div>
+        <div class="surole" data-sr="forwarder" onclick="suRole(this)"><div class="suico">✈️</div><div class="sunm">Forwarder</div></div>
+      </div>
+      <div class="asechead">👤 Personal</div>
+      <div class="ag2">
+        <div class="afg afc"><label>Full Name <span class="areq">*</span></label><input type="text" id="suNm" placeholder="e.g. Ramesh Kumar Sharma" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <!-- MOBILE NUMBER — FIXED -->
+        <div class="afg afc">
+          <label>Mobile Number <span class="areq">*</span></label>
+          <div class="ph-row">
+            <select class="cc-sel" id="suCc"><option value="+91">🇮🇳 +91</option><option value="+1">🇺🇸 +1</option><option value="+971">🇦🇪 +971</option><option value="+44">🇬🇧 +44</option></select>
+            <input class="ph-in" type="tel" id="suMob" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" pattern="[0-9]{10}" autocomplete="tel">
+          </div>
+        </div>
+        <div class="afg afc"><label>Email ID <span class="areq">*</span></label><input type="email" id="suEm" placeholder="yourname@company.com" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+      </div>
+      <div class="asechead">🏢 Business</div>
+      <div class="ag2">
+        <div class="afg"><label>Vendor Code <span class="areq">*</span></label><input type="text" id="suVc" placeholder="e.g. VND-2024-001" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>Company Name</label><input type="text" id="suCo" placeholder="Company / Firm name" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>GST Number</label><input type="text" id="suGst" placeholder="22AAAAA0000A1Z5" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>PAN Number</label><input type="text" id="suPan" placeholder="ABCDE1234F" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+      </div>
+      <div class="asechead">📍 Address</div>
+      <div class="ag2">
+        <div class="afg afc"><label>Address <span class="areq">*</span></label><input type="text" id="suAdr" placeholder="Building, Street, Area" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>City <span class="areq">*</span></label><input type="text" id="suCt" placeholder="e.g. Mumbai" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>Pincode <span class="areq">*</span></label><input type="text" id="suPin" placeholder="400001" maxlength="6" inputmode="numeric" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
+        <div class="afg"><label>State <span class="areq">*</span></label><select id="suSt" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"><option value="" disabled selected>Select state</option><option>Andhra Pradesh</option><option>Bihar</option><option>Delhi</option><option>Gujarat</option><option>Haryana</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Punjab</option><option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option><option>Uttar Pradesh</option><option>West Bengal</option></select></div>
+        <div class="afg"><label>Country</label><select id="suCtr" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"><option>India</option><option>UAE</option><option>USA</option><option>UK</option></select></div>
+      </div>
+      <div class="asechead">🔒 Password</div>
+      <div class="ag2">
+        <div class="afg"><label>Password <span class="areq">*</span></label><div class="apw-w"><input type="password" id="suPw" placeholder="Min. 8 characters" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 44px 12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"><button class="aeye" onclick="atpw('suPw',this)">👁</button></div></div>
+        <div class="afg"><label>Confirm Password <span class="areq">*</span></label><div class="apw-w"><input type="password" id="suPw2" placeholder="Re-enter password" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 44px 12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"><button class="aeye" onclick="atpw('suPw2',this)">👁</button></div></div>
+      </div>
+      <button class="abtn absh" id="suBtn" onclick="doSignUp()" style="margin-top:8px;">Create Shipper Account →</button>
+      <div class="aterms">By registering you agree to <a href="#">Terms</a> &amp; <a href="#">Privacy Policy</a></div>
+      <div class="assec"><div class="assdot"></div>Data encrypted · DPDP Act Compliant</div>
+      <div class="aswrow">Already registered? <a onclick="swAuth('si')">Sign In →</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ════ SIDEBAR ════ -->
+  <div class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">
+        <div class="sb-logo-icon">⚙️</div>
+        <div><div class="sb-logo-name">ProcureX</div><div class="sb-logo-tag">RFQ Platform</div></div>
+      </div>
+    </div>
+
+    <div class="sb-role-card" id="sbRoleCard">
+      <div class="src-label">Viewing As</div>
+      <div class="src-name" id="sbRoleName">Shipper Co.</div>
+      <div class="src-role" id="sbRoleLabel" style="color:var(--sh);">📦 Shipper</div>
+      <div class="src-vc" id="sbRoleVC">SHP-2024-001</div>
+    </div>
+
+    <div class="sb-nav">
+      <div class="nav-section">
+        <div class="nav-lbl">Overview</div>
+        <div class="nav-item active" onclick="navTo('dashboard',this)"><span class="ni">🏠</span>Dashboard</div>
+        <div class="nav-item" onclick="navTo('notifications',this)"><span class="ni">🔔</span>Notifications<span class="nav-badge" id="nb-notif">5</span></div>
+      </div>
+      <div class="nav-section" id="shipperNav">
+        <div class="nav-lbl">Shipper Tools</div>
+        <div class="nav-item" onclick="navTo('my-rfqs',this)"><span class="ni">📋</span>My RFQs<span class="nav-badge blue" id="nb-rfqs">3</span></div>
+        <div class="nav-item" onclick="navTo('create-rfq',this)"><span class="ni">➕</span>Create RFQ</div>
+        <div class="nav-item" onclick="navTo('bids-received',this)"><span class="ni">📥</span>Bids Received<span class="nav-badge green" id="nb-bids">12</span></div>
+        <div class="nav-item" onclick="navTo('awards',this)"><span class="ni">🏆</span>Awards & Orders</div>
+        <div class="nav-item" onclick="navTo('analytics',this)"><span class="ni">📊</span>Analytics</div>
+      </div>
+      <div class="nav-section" id="vendorNav" style="display:none;">
+        <div class="nav-lbl">Vendor Tools</div>
+        <div class="nav-item" onclick="navTo('open-rfqs',this)"><span class="ni">📢</span>Open RFQs<span class="nav-badge blue" id="nb-open">8</span></div>
+        <div class="nav-item" onclick="navTo('my-bids',this)"><span class="ni">🎯</span>My Bids</div>
+        <div class="nav-item" onclick="navTo('won-orders',this)"><span class="ni">🏆</span>Won Orders</div>
+        <div class="nav-item" onclick="navTo('bid-history',this)"><span class="ni">📜</span>Bid History</div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-lbl">Account</div>
+        <div class="nav-item" onclick="navTo('profile',this)"><span class="ni">👤</span>Profile</div>
+        <div class="nav-item" onclick="toast2('Logging out…','ti');setTimeout(()=>location.reload(),1500)"><span class="ni">↩</span>Logout</div>
+      </div>
+    </div>
+
+    <div class="sb-user" id="sbUser">
+      <div class="su-av" id="sbAv">S</div>
+      <div><div class="su-n" id="sbUserName">Demo Shipper</div><div class="su-r" id="sbUserRole">Shipper · Mumbai</div></div>
+    </div>
+  </div>
+
+  <!-- ════ MAIN ════ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-left">
+        <div>
+          <div class="tb-title" id="pgTitle">Dashboard</div>
+          <div class="tb-sub" id="pgSub">Welcome back — here's your procurement overview</div>
+        </div>
+      </div>
+      <div class="tb-right">
+        <!-- Role switcher for demo -->
+        <div class="role-switcher">
+          <button class="rs-btn rs-sh active" onclick="switchRole('shipper',this)">📦 Shipper</button>
+          <button class="rs-btn rs-su" onclick="switchRole('supplier',this)">🏭 Supplier</button>
+          <button class="rs-btn rs-tr" onclick="switchRole('transporter',this)">🚛 Transporter</button>
+          <button class="rs-btn rs-ff" onclick="switchRole('forwarder',this)">✈️ Forwarder</button>
+        </div>
+        <div class="notif-wrap">
+          <div class="notif-bell" onclick="navTo('notifications',document.querySelector('.nav-item.active'))">🔔</div>
+          <div class="notif-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page active" id="page-dashboard">
+        <div id="dash-shipper">
+          <div class="grid-auto">
+            <div class="stat-card sc-red"><div class="stat-icon">📋</div><div class="stat-val">7</div><div class="stat-lbl">Active RFQs</div><div class="stat-chg">↑ 2 published this week</div></div>
+            <div class="stat-card sc-blue"><div class="stat-icon">📥</div><div class="stat-val">34</div><div class="stat-lbl">Total Bids Received</div><div class="stat-chg">↑ 8 new today</div></div>
+            <div class="stat-card sc-green"><div class="stat-icon">🏆</div><div class="stat-val">12</div><div class="stat-lbl">Awards Issued</div><div class="stat-chg">₹4.8Cr awarded MTD</div></div>
+            <div class="stat-card sc-gold"><div class="stat-icon">⏳</div><div class="stat-val">3</div><div class="stat-lbl">Awaiting Evaluation</div><div class="stat-chg">2 closing today</div></div>
+            <div class="stat-card sc-purple"><div class="stat-icon">💰</div><div class="stat-val">18%</div><div class="stat-lbl">Avg. Cost Savings</div><div class="stat-chg">vs. last quarter</div></div>
+            <div class="stat-card sc-teal"><div class="stat-icon">⭐</div><div class="stat-val">4.6</div><div class="stat-lbl">Avg. Vendor Rating</div><div class="stat-chg">87 active vendors</div></div>
+          </div>
+
+          <div class="section-hd">
+            <h2>🔴 Live — Bids Closing Soon</h2>
+            <a onclick="navTo('my-rfqs',document.querySelector('.nav-item'))">View all →</a>
+          </div>
+          <div class="rfq-list" id="dash-live-rfqs"></div>
+        </div>
+
+        <div id="dash-vendor" style="display:none;">
+          <div class="grid-auto">
+            <div class="stat-card sc-blue"><div class="stat-icon">📢</div><div class="stat-val" id="vd-open">8</div><div class="stat-lbl">Open RFQs</div><div class="stat-chg">Matching your profile</div></div>
+            <div class="stat-card sc-green"><div class="stat-icon">🎯</div><div class="stat-val" id="vd-bids">5</div><div class="stat-lbl">My Active Bids</div><div class="stat-chg">3 under evaluation</div></div>
+            <div class="stat-card sc-gold"><div class="stat-icon">🏆</div><div class="stat-val" id="vd-won">4</div><div class="stat-lbl">Orders Won</div><div class="stat-chg">↑ 2 this month</div></div>
+            <div class="stat-card sc-purple"><div class="stat-icon">⭐</div><div class="stat-val">4.8</div><div class="stat-lbl">My Rating</div><div class="stat-chg">Top 10% vendor</div></div>
+          </div>
+          <div class="section-hd"><h2>📢 Open RFQs — Place Your Bid</h2><a onclick="navTo('open-rfqs',document.querySelector('.nav-item'))">View all →</a></div>
+          <div class="rfq-list" id="dash-vendor-rfqs"></div>
+        </div>
+      </div>
+
+      <!-- ══ MY RFQs (SHIPPER) ══ -->
+      <div class="page" id="page-my-rfqs">
+        <div class="filter-bar">
+          <input type="text" class="search-input" placeholder="🔍 Search RFQs…">
+          <select class="filter-select"><option>All Status</option><option>Draft</option><option>Open</option><option>Bidding</option><option>Evaluation</option><option>Awarded</option><option>Closed</option></select>
+          <select class="filter-select"><option>All Types</option><option>Supplier</option><option>Transporter</option><option>Freight Forwarder</option></select>
+          <select class="filter-select"><option>All Time</option><option>This Week</option><option>This Month</option><option>Last Quarter</option></select>
+          <button class="tb-btn tb-btn-primary" onclick="openModal('createRFQModal')">+ Create RFQ</button>
+        </div>
+        <div class="rfq-list" id="my-rfq-list"></div>
+      </div>
+
+      <!-- ══ CREATE RFQ ══ -->
+      <div class="page" id="page-create-rfq">
+        <div class="card" style="max-width:600px;">
+          <div class="empty"><div class="empty-icon">📋</div><div class="empty-title">Create a New RFQ</div><div class="empty-sub">Use the RFQ wizard to broadcast your freight or procurement requirement to Suppliers, Transporters and Freight Forwarders instantly.</div>
+          <button class="btn btn-primary" style="font-size:15px;padding:14px 32px;" onclick="openModal('createRFQModal')">📤 Launch RFQ Wizard</button></div>
+        </div>
+      </div>
+
+      <!-- ══ BIDS RECEIVED (SHIPPER) ══ -->
+      <div class="page" id="page-bids-received">
+        <div id="bids-rec-content">
+          <div class="section-hd"><h2>Bids Received</h2><span style="font-size:13px;color:var(--muted);">Select an RFQ to compare bids</span></div>
+          <div class="rfq-list" id="bids-rfq-selector" style="margin-bottom:24px;"></div>
+          <div id="bids-comparison" style="display:none;">
+            <div class="section-hd">
+              <h2 id="bids-rfq-title">Bid Comparison</h2>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-ghost btn-sm">📊 Export</button>
+                <button class="btn btn-gold btn-sm" onclick="showAwardModal()">🏆 Award Best Bid</button>
+              </div>
+            </div>
+            <div class="card mb">
+              <div class="card-title">Live Bid Rankings</div>
+              <div style="overflow-x:auto;"><table class="bid-table" id="bidCompTable"></table></div>
+            </div>
+            <div class="g2">
+              <div class="card">
+                <div class="card-title">Bid Timeline</div>
+                <div class="timeline" id="bidTimeline"></div>
+              </div>
+              <div class="card">
+                <div class="card-title">Bid Analytics</div>
+                <div id="bidAnalytics"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AWARDS ══ -->
+      <div class="page" id="page-awards">
+        <div id="awards-content"></div>
+      </div>
+
+      <!-- ══ OPEN RFQs (VENDOR) ══ -->
+      <div class="page" id="page-open-rfqs">
+        <div class="filter-bar">
+          <input type="text" class="search-input" placeholder="🔍 Search open RFQs…">
+          <select class="filter-select" id="open-rfq-type-filter"><option>All Types</option><option>Supplier RFQs</option><option>Transport RFQs</option><option>Freight Forwarding RFQs</option></select>
+          <select class="filter-select"><option>All Modes</option><option>Road (FTL)</option><option>Sea (FCL)</option><option>Sea (LCL)</option><option>Air Freight</option></select>
+          <select class="filter-select"><option>Closing: Soonest</option><option>Highest Budget</option><option>Newest First</option></select>
+        </div>
+        <div class="rfq-list" id="vendor-open-rfqs"></div>
+      </div>
+
+      <!-- ══ MY BIDS (VENDOR) ══ -->
+      <div class="page" id="page-my-bids">
+        <div class="rfq-list" id="my-bids-list"></div>
+      </div>
+
+      <!-- ══ NOTIFICATIONS ══ -->
+      <div class="page" id="page-notifications">
+        <div class="notif-panel" id="notif-panel"></div>
+      </div>
+
+      <!-- ══ ANALYTICS ══ -->
+      <div class="page" id="page-analytics">
+        <div class="grid-auto" style="margin-bottom:24px;">
+          <div class="stat-card sc-red"><div class="stat-icon">📋</div><div class="stat-val">24</div><div class="stat-lbl">RFQs This Quarter</div><div class="stat-chg">↑ 40% vs last quarter</div></div>
+          <div class="stat-card sc-blue"><div class="stat-icon">📥</div><div class="stat-val">187</div><div class="stat-lbl">Total Bids Received</div><div class="stat-chg">Avg. 7.8 bids per RFQ</div></div>
+          <div class="stat-card sc-green"><div class="stat-icon">💰</div><div class="stat-val">22%</div><div class="stat-lbl">Cost Saved vs Budget</div><div class="stat-chg">₹1.2Cr saved this quarter</div></div>
+          <div class="stat-card sc-gold"><div class="stat-icon">⚡</div><div class="stat-val">2.4d</div><div class="stat-lbl">Avg. Bid Cycle Time</div><div class="stat-chg">↓ 18% faster</div></div>
+        </div>
+        <div class="g2">
+          <div class="card mb"><div class="card-title">Top Vendor Categories</div>
+            <div id="topVendors"></div>
+          </div>
+          <div class="card mb"><div class="card-title">RFQ Outcomes</div>
+            <div id="rfqOutcomes"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PROFILE ══ -->
+      <div class="page" id="page-profile">
+        <div class="card" style="max-width:600px;">
+          <div class="card-title">Account Details</div>
+          <div id="profile-content"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ STATE ═══ */
+let currentRole = 'shipper';
+let currentRFQForBid = null;
+
+const ROLES = {
+  shipper: { name:'Acme Industries Ltd', label:'📦 Shipper', vc:'SHP-2024-001', color:'var(--sh)', city:'Mumbai' },
+  supplier: { name:'Global Supply Co.', label:'🏭 Supplier', vc:'SUP-2024-042', color:'var(--su)', city:'Ahmedabad' },
+  transporter: { name:'Swift Logistics', label:'🚛 Transporter', vc:'TRP-2024-018', color:'var(--tr)', city:'Pune' },
+  forwarder: { name:'Ocean Air Forwarding', label:'✈️ Freight Forwarder', vc:'FF-2024-009', color:'var(--ff)', city:'Chennai' }
+};
+
+/* ═══ SAMPLE RFQ DATA ═══ */
+const RFQs = [
+  {
+    id:'RFQ-2024-001', title:'Cement Bulk Supply — Mumbai to Pune', cargo:'Construction Materials', mode:'Road (FTL)',
+    qty:'500 MT', origin:'Bhiwandi, Mumbai', dest:'Hadapsar, Pune', delivery:'2024-12-28', budget:95000,
+    status:'bidding', types:['transporter'], openAt:'2024-12-18T09:00', closeAt:'2024-12-21T18:00',
+    auction:'Sealed Bid', eval:'Lowest Price (L1)', payment:'30% Advance + 70% on Delivery',
+    conditions:['GST Registered','Cargo Insurance Mandatory','Min 3 Years Experience'],
+    bids:[
+      {vendor:'Swift Logistics',vc:'TRP-001',role:'transporter',amount:88000,transit:'1 day',rating:4.8,time:'2024-12-19 10:23',remarks:'Full fleet available, GPS tracking included'},
+      {vendor:'Roadway Express',vc:'TRP-002',role:'transporter',amount:91500,transit:'1-2 days',rating:4.5,time:'2024-12-19 11:45',remarks:'Own trucks, experienced drivers'},
+      {vendor:'Fast Move Cargo',vc:'TRP-003',role:'transporter',amount:86000,transit:'1 day',rating:4.3,time:'2024-12-19 14:10',remarks:'Competitive pricing, bulk specialist'},
+      {vendor:'Prime Transport',vc:'TRP-004',role:'transporter',amount:93000,transit:'2 days',rating:4.7,time:'2024-12-20 09:00',remarks:'ISO certified, 15 years experience'},
+    ],
+    penalty:'0.5% per day', contract:'One-time', rebid:true, counter:true, anon:false
+  },
+  {
+    id:'RFQ-2024-002', title:'FCL Sea Freight — Nhava Sheva to Rotterdam', cargo:'Finished Goods', mode:'Sea (FCL)',
+    qty:'20 FEU Containers', origin:'Nhava Sheva Port, Mumbai', dest:'Rotterdam, Netherlands', delivery:'2025-01-15', budget:280000,
+    status:'open', types:['forwarder'], openAt:'2024-12-17T00:00', closeAt:'2024-12-23T18:00',
+    auction:'Best of 3 Rounds', eval:'Best Value (Price + Experience + Rating)', payment:'LC (Letter of Credit)',
+    conditions:['ISO Certified','FIATA Member Preferred','Minimum 5 Years International Experience'],
+    bids:[
+      {vendor:'Ocean Air Forwarding',vc:'FF-001',role:'forwarder',amount:265000,transit:'22-24 days',rating:4.9,time:'2024-12-18 08:30',remarks:'Direct MLO contract, real-time tracking, customs clearance included'},
+      {vendor:'Global Freight Solutions',vc:'FF-002',role:'forwarder',amount:272000,transit:'21 days',rating:4.7,time:'2024-12-19 10:00',remarks:'Premium service, dedicated account manager'},
+    ],
+    penalty:'1% per week', contract:'One-time', rebid:false, counter:false, anon:true
+  },
+  {
+    id:'RFQ-2024-003', title:'Steel Coils Supply — Q1 2025 Annual Contract', cargo:'Raw Materials', mode:'Road (FTL)',
+    qty:'2000 MT per month', origin:'Raipur, Chhattisgarh', dest:'Rajkot, Gujarat', delivery:'2025-03-31', budget:4500000,
+    status:'evaluation', types:['supplier','transporter'], openAt:'2024-12-10T00:00', closeAt:'2024-12-18T23:59',
+    auction:'Sealed Bid', eval:'Technical + Commercial (Weighted)', payment:'Net 45 Days from Invoice',
+    conditions:['GST Registered','BIS Certified Material','Minimum 3 Years Experience','Cargo Insurance Mandatory'],
+    bids:[
+      {vendor:'Global Supply Co.',vc:'SUP-001',role:'supplier',amount:4200000,transit:'7 days',rating:4.8,time:'2024-12-15 09:00',remarks:'IS2062 Grade A, BIS certified, own warehouse'},
+      {vendor:'Steel Masters India',vc:'SUP-002',role:'supplier',amount:4350000,transit:'5 days',rating:4.6,time:'2024-12-16 11:00',remarks:'Premium quality, guaranteed delivery SLA'},
+      {vendor:'Bharat Steel Works',vc:'SUP-003',role:'supplier',amount:4150000,transit:'10 days',rating:4.4,time:'2024-12-17 14:00',remarks:'Largest steel distributor in Chhattisgarh'},
+      {vendor:'Swift Logistics',vc:'TRP-001',role:'transporter',amount:185000,transit:'2 days',rating:4.8,time:'2024-12-15 10:00',remarks:'Dedicated fleet for steel, hydraulic flatbeds'},
+      {vendor:'Iron Road Carriers',vc:'TRP-005',role:'transporter',amount:172000,transit:'2-3 days',rating:4.5,time:'2024-12-16 15:00',remarks:'Specialized in heavy cargo'},
+    ],
+    penalty:'0.25% per day (max 2.5%)', contract:'12 months', rebid:false, counter:true, anon:false
+  },
+  {
+    id:'RFQ-2024-004', title:'Air Freight — Pharma Samples to Dubai', cargo:'Chemicals', mode:'Air Freight',
+    qty:'500 kg (Temperature Controlled)', origin:'BOM — Chhatrapati Shivaji International', dest:'DXB — Dubai International', delivery:'2024-12-24', budget:85000,
+    status:'draft', types:['forwarder'], openAt:'2024-12-22T00:00', closeAt:'2024-12-24T12:00',
+    auction:'Sealed Bid', eval:'Lowest Price (L1)', payment:'100% on Delivery',
+    conditions:['IATA Certified','Cold Chain Capability','DG Cargo Handling'],
+    bids:[], penalty:'₹5000 per hour delay', contract:'One-time', rebid:false, counter:false, anon:false
+  },
+  {
+    id:'RFQ-2024-005', title:'FMCG Distribution — Pan India Q4', cargo:'FMCG', mode:'Road (LTL/Part Load)',
+    qty:'Multiple drops — 50 cities', origin:'Bhiwandi Logistics Hub, Mumbai', dest:'Pan India', delivery:'2025-01-10', budget:1200000,
+    status:'awarded', types:['transporter'], openAt:'2024-12-01T00:00', closeAt:'2024-12-08T18:00',
+    auction:'Reverse Auction', eval:'Best Value (Price + Experience + Rating)', payment:'Net 30 Days from Invoice',
+    conditions:['GST Registered','GPS Tracking Mandatory','Own Fleet Preferred'],
+    bids:[
+      {vendor:'Pan India Logistics',vc:'TRP-010',role:'transporter',amount:1080000,transit:'5-7 days',rating:4.9,time:'2024-12-05 10:00',remarks:'50+ city network, GPS enabled',awarded:true},
+      {vendor:'National Cargo Movers',vc:'TRP-011',role:'transporter',amount:1150000,transit:'7 days',rating:4.6,time:'2024-12-06 09:00',remarks:'Extensive network'},
+      {vendor:'Swift Logistics',vc:'TRP-001',role:'transporter',amount:1090000,transit:'6 days',rating:4.8,time:'2024-12-07 11:00',remarks:'Reliable nationwide service'},
+    ],
+    awardedTo:'Pan India Logistics', awardedVC:'TRP-010', awardedAmount:1080000,
+    penalty:'1% per day', contract:'One-time', rebid:true, counter:false, anon:false
+  }
+];
+
+const NOTIFS = [
+  {icon:'📥',bg:'#eff6ff',title:'New Bid on RFQ-2024-001',sub:'Fast Move Cargo submitted a bid of ₹86,000 — currently the lowest',time:'10 min ago',unread:true},
+  {icon:'⏰',bg:'#fffbeb',title:'RFQ-2024-002 closing in 4 hours',sub:'Only 2 bids received — consider extending deadline',time:'2 hrs ago',unread:true},
+  {icon:'🏆',bg:'#f0fdf4',title:'RFQ-2024-005 Award Confirmed',sub:'Pan India Logistics accepted your PO — Order #PO-2024-078 raised',time:'Yesterday',unread:true},
+  {icon:'🔔',bg:'#faf5ff',title:'RFQ-2024-003 Evaluation Started',sub:'Bids are now under technical evaluation. Result expected in 2 days',time:'Yesterday',unread:false},
+  {icon:'💬',bg:'#f0fdf4',title:'Query from Swift Logistics',sub:'Regarding RFQ-2024-001: "Is toll included in the bid amount?"',time:'2 days ago',unread:false},
+  {icon:'📊',bg:'#f8fafc',title:'Weekly RFQ Analytics Ready',sub:'Your procurement spend report for W50 is ready to download',time:'3 days ago',unread:false},
+];
+
+/* ═══ NAV ═══ */
+function navTo(pid, el) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pid)?.classList.add('active');
+  const titles={
+    'dashboard':'Dashboard','my-rfqs':'My RFQs','create-rfq':'Create RFQ',
+    'bids-received':'Bids Received','awards':'Awards & Orders','analytics':'Analytics',
+    'open-rfqs':'Open RFQs','my-bids':'My Bids','won-orders':'Won Orders','bid-history':'Bid History',
+    'notifications':'Notifications','profile':'Profile'
+  };
+  const subs={
+    'dashboard': currentRole==='shipper'?'Your procurement command centre':'Your bidding dashboard',
+    'my-rfqs':'Manage all your published and draft RFQs',
+    'create-rfq':'Broadcast a new RFQ to vendors',
+    'bids-received':'Compare and evaluate all vendor bids',
+    'awards':'View awarded contracts and active purchase orders',
+    'analytics':'Procurement spend analysis and vendor performance',
+    'open-rfqs':'Browse and bid on RFQs matching your profile',
+    'my-bids':'Track all bids you have submitted',
+    'won-orders':'Manage orders awarded to you',
+    'bid-history':'Full history of all your bid activity',
+    'notifications':'All alerts and updates',
+    'profile':'Your account and vendor details'
+  };
+  document.getElementById('pgTitle').textContent = titles[pid]||pid;
+  document.getElementById('pgSub').textContent = subs[pid]||'';
+  if(pid==='bids-received') renderBidsReceived();
+  if(pid==='awards') renderAwards();
+  if(pid==='analytics') renderAnalytics();
+  if(pid==='notifications') renderNotifs();
+  if(pid==='profile') renderProfile();
+}
+
+/* ═══ ROLE SWITCHER ═══ */
+function switchRole(role, btn) {
+  currentRole = role;
+  document.querySelectorAll('.rs-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const r = ROLES[role];
+  document.getElementById('sbRoleName').textContent = r.name;
+  document.getElementById('sbRoleLabel').textContent = r.label;
+  document.getElementById('sbRoleLabel').style.color = r.color;
+  document.getElementById('sbRoleVC').textContent = r.vc;
+  document.getElementById('sbUserName').textContent = r.name;
+  document.getElementById('sbUserRole').textContent = `${r.label.split(' ').slice(1).join(' ')} · ${r.city}`;
+  document.getElementById('sbAv').textContent = r.name[0];
+  // Show/hide nav
+  const isShipper = role==='shipper';
+  document.getElementById('shipperNav').style.display = isShipper?'block':'none';
+  document.getElementById('vendorNav').style.display = isShipper?'none':'block';
+  // Dashboard toggle
+  document.getElementById('dash-shipper').style.display = isShipper?'block':'none';
+  document.getElementById('dash-vendor').style.display = isShipper?'none':'block';
+  if(!isShipper) renderVendorDashboard(role);
+  renderDashLiveRFQs();
+  toast2(`Switched to ${r.label} view`, 'ti');
+}
+
+/* ═══ STATUS BADGE ═══ */
+function statusBadge(s) {
+  const m={
+    draft:'<span class="badge badge-draft"><span class="badge-dot"></span>Draft</span>',
+    open:'<span class="badge badge-open"><span class="badge-dot bd-open"></span>Open — Accepting Bids</span>',
+    bidding:'<span class="badge badge-bidding"><span class="badge-dot bd-bidding"></span>Bidding Live</span>',
+    evaluation:'<span class="badge badge-evaluation"><span class="badge-dot bd-evaluation"></span>Under Evaluation</span>',
+    awarded:'<span class="badge badge-awarded"><span class="badge-dot bd-awarded"></span>Awarded</span>',
+    closed:'<span class="badge badge-closed"><span class="badge-dot bd-closed"></span>Closed</span>',
+    cancelled:'<span class="badge badge-cancelled">Cancelled</span>'
+  };
+  return m[s]||'';
+}
+
+function typeBadge(t) {
+  const m={supplier:'<span class="type-badge t-supplier">🏭 Supplier</span>',transporter:'<span class="type-badge t-transporter">🚛 Transporter</span>',forwarder:'<span class="type-badge t-forwarder">✈️ Forwarder</span>'};
+  return (t||[]).map(x=>m[x]||'').join(' ');
+}
+
+/* ═══ TIMER HELPERS ═══ */
+function getTimeLeft(closeAt) {
+  const diff = new Date(closeAt) - new Date();
+  if(diff<=0) return {over:true};
+  const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m2=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
+  return {d,h,m:m2,s,over:false,urgent:diff<3600000*4};
+}
+
+function timerLabel(closeAt) {
+  const t=getTimeLeft(closeAt);
+  if(t.over) return '<span class="rfq-timer urgent">⏱ CLOSED</span>';
+  if(t.urgent) return `<span class="rfq-timer urgent">🔴 ${t.h}h ${t.m}m left</span>`;
+  if(t.d>0) return `<span class="rfq-timer normal">⏱ ${t.d}d ${t.h}h left</span>`;
+  return `<span class="rfq-timer open">⏱ ${t.h}h ${t.m}m left</span>`;
+}
+
+function countdownHTML(closeAt) {
+  const t=getTimeLeft(closeAt);
+  if(t.over) return '<div style="color:#ff6b6b;font-size:18px;font-weight:700;">🔴 Bidding Closed</div>';
+  return `<div class="countdown">
+    <div class="cd-block"><div class="cd-val">${String(t.d).padStart(2,'0')}</div><div class="cd-lbl">Days</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block"><div class="cd-val">${String(t.h).padStart(2,'0')}</div><div class="cd-lbl">Hrs</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block"><div class="cd-val">${String(t.m).padStart(2,'0')}</div><div class="cd-lbl">Min</div></div>
+    <div class="cd-sep">:</div>
+    <div class="cd-block"><div class="cd-val">${String(t.s).padStart(2,'0')}</div><div class="cd-lbl">Sec</div></div>
+  </div>`;
+}
+
+/* ═══ RENDER RFQ CARD ═══ */
+function rfqCardHTML(r, mode='shipper') {
+  const bestBid = r.bids.length ? Math.min(...r.bids.map(b=>b.amount)) : null;
+  const savings = bestBid && r.budget ? Math.round(((r.budget-bestBid)/r.budget)*100) : null;
+  const actionBtn = mode==='shipper'
+    ? `<button class="btn btn-blue btn-sm" onclick="openRFQDetail('${r.id}')">View Bids (${r.bids.length})</button>`
+    : (r.status==='open'||r.status==='bidding')
+      ? `<button class="btn btn-primary btn-sm" onclick="openBidModal('${r.id}')">🎯 Place Bid</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="openRFQDetail('${r.id}')">View Details</button>`;
+  return `<div class="rfq-card" onclick="">
+    <div class="rfq-header">
+      <div style="flex:1">
+        <div class="rfq-id">${r.id}</div>
+        <div class="rfq-title">${r.title}</div>
+        <div class="rfq-type">${statusBadge(r.status)} ${typeBadge(r.types)}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:16px;">
+        ${r.budget ? `<div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;">₹${fmtNum(r.budget)}</div><div style="font-size:11px;color:var(--muted);">Budget/Target</div>` : ''}
+        ${savings!==null ? `<div class="tag tag-green" style="margin-top:4px;">↓ ${savings}% L1</div>` : ''}
+      </div>
+    </div>
+    <div class="rfq-meta">
+      <div class="rfq-meta-item">📦 <strong>${r.cargo}</strong></div>
+      <div class="rfq-meta-item">🚢 <strong>${r.mode}</strong></div>
+      <div class="rfq-meta-item">📊 <strong>${r.qty}</strong></div>
+      <div class="rfq-meta-item">📍 <strong>${r.origin.split(',')[0]}</strong> → <strong>${r.dest.split(',')[0]}</strong></div>
+      <div class="rfq-meta-item">📅 <strong>${r.delivery}</strong></div>
+    </div>
+    <div class="rfq-footer">
+      <div class="rfq-bids"><strong>${r.bids.length}</strong> bid${r.bids.length!==1?'s':''} received ${bestBid?`· Best: <strong>₹${fmtNum(bestBid)}</strong>`:''}</div>
+      <div style="display:flex;align-items:center;gap:10px;">${timerLabel(r.closeAt)} ${actionBtn}</div>
+    </div>
+  </div>`;
+}
+
+/* ═══ RENDER SECTIONS ═══ */
+function renderDashLiveRFQs() {
+  const el = document.getElementById('dash-live-rfqs');
+  const live = RFQs.filter(r=>r.status==='bidding'||r.status==='open');
+  el.innerHTML = live.map(r=>rfqCardHTML(r,'shipper')).join('') || '<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No live RFQs</div></div>';
+}
+
+function renderMyRFQs() {
+  document.getElementById('my-rfq-list').innerHTML = RFQs.map(r=>rfqCardHTML(r,'shipper')).join('');
+}
+
+function renderVendorDashboard(role) {
+  const el = document.getElementById('dash-vendor-rfqs');
+  const relevant = RFQs.filter(r=>(r.status==='open'||r.status==='bidding')&&(r.types.includes(role)||r.types.includes('all')));
+  el.innerHTML = relevant.map(r=>rfqCardHTML(r,'vendor')).join('') || '<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No matching open RFQs</div><div class="empty-sub">Check back later for new opportunities matching your profile.</div></div>';
+  document.getElementById('vd-open').textContent = relevant.length;
+}
+
+function renderOpenRFQs() {
+  const el = document.getElementById('vendor-open-rfqs');
+  const relevant = RFQs.filter(r=>r.status==='open'||r.status==='bidding');
+  el.innerHTML = relevant.map(r=>rfqCardHTML(r,'vendor')).join('');
+}
+
+function renderBidsReceived() {
+  const el = document.getElementById('bids-rfq-selector');
+  el.innerHTML = RFQs.filter(r=>r.bids.length>0).map(r=>`
+    <div class="rfq-card" onclick="selectRFQForBids('${r.id}')">
+      <div class="rfq-header">
+        <div style="flex:1"><div class="rfq-id">${r.id}</div><div class="rfq-title">${r.title}</div><div class="rfq-type">${statusBadge(r.status)}</div></div>
+        <div style="text-align:right;"><div style="font-size:20px;font-weight:800;">${r.bids.length}</div><div style="font-size:11px;color:var(--muted)">bids</div></div>
+      </div>
+    </div>`).join('');
+}
+
+function selectRFQForBids(id) {
+  const r = RFQs.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('bids-comparison').style.display='block';
+  document.getElementById('bids-rfq-title').textContent = `Bid Comparison — ${r.title}`;
+  // Bid table
+  const sorted = [...r.bids].sort((a,b)=>a.amount-b.amount);
+  const table = document.getElementById('bidCompTable');
+  table.innerHTML = `<thead><tr><th>Rank</th><th>Vendor</th><th>Role</th><th>Bid Amount</th><th>Transit</th><th>Rating</th><th>Submitted</th><th>Remarks</th><th>Action</th></tr></thead>
+  <tbody>${sorted.map((b,i)=>`<tr class="${i===0?'best-bid':''}">
+    <td><div class="bid-rank rank-${Math.min(i+1,4)}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div></td>
+    <td><div style="font-weight:700">${b.vendor}</div><div style="font-size:11px;font-family:monospace;color:var(--muted2)">${b.vc}</div></td>
+    <td><div class="type-badge t-${b.role}">${b.role==='supplier'?'🏭':b.role==='transporter'?'🚛':'✈️'} ${b.role}</div></td>
+    <td><div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;">₹${fmtNum(b.amount)}</div>${i===0?'<div class="tag tag-green" style="font-size:10px;margin-top:3px;">L1 — Lowest</div>':''}</td>
+    <td>${b.transit}</td>
+    <td>⭐ ${b.rating}</td>
+    <td style="font-size:11px;color:var(--muted)">${b.time}</td>
+    <td style="font-size:12px;max-width:180px;color:var(--muted)">${b.remarks}</td>
+    <td>
+      ${b.awarded?'<span class="badge badge-awarded">🏆 Awarded</span>':
+      r.status==='evaluation'||r.status==='bidding'||r.status==='open'?
+      `<button class="btn btn-gold btn-sm" onclick="awardBid('${r.id}','${b.vc}','${b.vendor}',${b.amount})">Award</button>
+       <button class="btn btn-ghost btn-sm" style="margin-top:4px;" onclick="toast2('Query sent to ${b.vendor}','ts')">Query</button>`:
+      '<span style="color:var(--muted2);font-size:12px;">—</span>'}
+    </td>
+  </tr>`).join('')}</tbody>`;
+  // Timeline
+  const tl = document.getElementById('bidTimeline');
+  tl.innerHTML = [
+    {dot:'done',ico:'✅',title:'RFQ Published',sub:'Broadcast to '+r.types.join(', '),time:r.openAt},
+    {dot:'done',ico:'📥',title:`${r.bids.length} Bids Received`,sub:'From qualified vendors',time:r.bids[0]?.time||'—'},
+    {dot:r.status==='evaluation'?'active':'pending',ico:'🔍',title:'Evaluation',sub:'Comparing bids on price, quality & terms',time:r.status==='evaluation'?'In Progress':'Pending'},
+    {dot:r.status==='awarded'?'done':'pending',ico:'🏆',title:'Award',sub:'PO issued to winning vendor',time:r.awardedTo?'Awarded to '+r.awardedTo:'Pending'},
+  ].map(t=>`<div class="tl-item"><div class="tl-dot ${t.dot}">${t.dot==='done'?'✓':t.dot==='active'?'…':''}</div><div class="tl-body"><div class="tl-title">${t.ico} ${t.title}</div><div class="tl-sub">${t.sub}</div><div class="tl-time">${t.time}</div></div></div>`).join('');
+  // Analytics
+  const best = sorted[0];
+  const avg = Math.round(r.bids.reduce((s,b)=>s+b.amount,0)/r.bids.length);
+  document.getElementById('bidAnalytics').innerHTML = `
+    <div class="info-row"><div class="ir-lbl">Budget</div><div class="ir-val">₹${fmtNum(r.budget)}</div></div>
+    <div class="info-row"><div class="ir-lbl">Lowest Bid (L1)</div><div class="ir-val" style="color:var(--green);">₹${fmtNum(best?.amount||0)}</div></div>
+    <div class="info-row"><div class="ir-lbl">Average Bid</div><div class="ir-val">₹${fmtNum(avg)}</div></div>
+    <div class="info-row"><div class="ir-lbl">Saving vs Budget</div><div class="ir-val" style="color:var(--green);">₹${fmtNum(r.budget-(best?.amount||0))} (${Math.round(((r.budget-(best?.amount||0))/r.budget)*100)}%)</div></div>
+    <div class="info-row"><div class="ir-lbl">Total Bidders</div><div class="ir-val">${r.bids.length}</div></div>
+    <div class="info-row"><div class="ir-lbl">Auction Type</div><div class="ir-val">${r.auction}</div></div>
+    <div class="info-row"><div class="ir-lbl">Evaluation</div><div class="ir-val">${r.eval}</div></div>`;
+}
+
+function awardBid(rfqId, vc, vendor, amount) {
+  const r = RFQs.find(x=>x.id===rfqId);
+  if(!r) return;
+  r.status='awarded'; r.awardedTo=vendor; r.awardedVC=vc; r.awardedAmount=amount;
+  r.bids.forEach(b=>b.awarded=b.vc===vc);
+  toast2(`🏆 Award issued to ${vendor} for ₹${fmtNum(amount)}! PO raised automatically.`,'ts');
+  setTimeout(()=>selectRFQForBids(rfqId),300);
+}
+
+function renderAwards() {
+  const awarded = RFQs.filter(r=>r.status==='awarded');
+  document.getElementById('awards-content').innerHTML = awarded.length ? awarded.map(r=>`
+    <div class="award-card">
+      <div class="ac-label">🏆 Awarded Contract — ${r.id}</div>
+      <div class="ac-vendor">${r.awardedTo} <span style="font-size:14px;color:rgba(255,255,255,.4);font-family:monospace;">${r.awardedVC}</span></div>
+      <div class="ac-amount">₹${fmtNum(r.awardedAmount)}</div>
+      <div style="font-size:14px;color:rgba(255,255,255,.6);margin-top:6px;">${r.title}</div>
+      <div class="ac-meta">
+        <div class="ac-meta-item">Cargo<strong>${r.cargo}</strong></div>
+        <div class="ac-meta-item">Mode<strong>${r.mode}</strong></div>
+        <div class="ac-meta-item">Delivery<strong>${r.delivery}</strong></div>
+        <div class="ac-meta-item">Payment<strong>${r.payment}</strong></div>
+        <div class="ac-meta-item">Savings<strong style="color:#4ade80;">₹${fmtNum(r.budget-r.awardedAmount)} (${Math.round(((r.budget-r.awardedAmount)/r.budget)*100)}%)</strong></div>
+      </div>
+    </div>
+    <div class="card mb">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-green btn-sm" onclick="toast2('Purchase Order PO-${r.id} downloaded','ts')">📄 Download PO</button>
+        <button class="btn btn-blue btn-sm" onclick="toast2('Order confirmation sent to ${r.awardedTo}','ts')">📧 Send Confirmation</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast2('Tracking link shared','ts')">📍 Track Shipment</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast2('Invoice requested','ts')">🧾 Request Invoice</button>
+      </div>
+    </div>`).join('') : '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-title">No awards yet</div><div class="empty-sub">Award bids from the Bids Received section to see them here.</div></div>';
+}
+
+function renderNotifs() {
+  document.getElementById('notif-panel').innerHTML = NOTIFS.map(n=>`
+    <div class="notif-item ${n.unread?'unread':''}">
+      <div class="ni-icon" style="background:${n.bg}">${n.icon}</div>
+      <div class="ni-body"><div class="ni-title">${n.title}</div><div class="ni-sub">${n.sub}</div><div class="ni-time">${n.time}</div></div>
+      ${n.unread?'<div style="width:8px;height:8px;border-radius:50%;background:var(--blue2);flex-shrink:0;margin-top:5px;"></div>':''}
+    </div>`).join('');
+}
+
+function renderAnalytics() {
+  document.getElementById('topVendors').innerHTML = [
+    {name:'Transporters',pct:45,color:'var(--tr)'},{name:'Suppliers',pct:32,color:'var(--su)'},{name:'Freight Forwarders',pct:23,color:'var(--ff)'}
+  ].map(v=>`<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;"><span style="font-weight:600">${v.name}</span><span style="font-weight:700;color:${v.color}">${v.pct}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${v.pct}%;background:${v.color}"></div></div></div>`).join('');
+  document.getElementById('rfqOutcomes').innerHTML = [
+    {label:'Awarded',val:'58%',color:'var(--green)'},{label:'Under Eval',val:'17%',color:'var(--gold)'},{label:'Open',val:'13%',color:'var(--blue2)'},{label:'Cancelled',val:'12%',color:'var(--muted)'}
+  ].map(o=>`<div class="info-row"><div class="ir-lbl">${o.label}</div><div class="ir-val" style="color:${o.color}">${o.val}</div></div>`).join('');
+}
+
+function renderProfile() {
+  const r = ROLES[currentRole];
+  document.getElementById('profile-content').innerHTML = `
+    <div class="info-row"><div class="ir-lbl">Company Name</div><div class="ir-val">${r.name}</div></div>
+    <div class="info-row"><div class="ir-lbl">Role</div><div class="ir-val">${r.label}</div></div>
+    <div class="info-row"><div class="ir-lbl">Vendor Code</div><div class="ir-val" style="font-family:monospace;color:var(--blue)">${r.vc}</div></div>
+    <div class="info-row"><div class="ir-lbl">City</div><div class="ir-val">${r.city}</div></div>
+    <div class="info-row"><div class="ir-lbl">Platform Rating</div><div class="ir-val">⭐ 4.8 / 5.0</div></div>
+    <div class="info-row"><div class="ir-lbl">Member Since</div><div class="ir-val">January 2024</div></div>`;
+}
+
+/* ═══ RFQ DETAIL MODAL ═══ */
+function openRFQDetail(id) {
+  const r = RFQs.find(x=>x.id===id);
+  if(!r) return;
+  document.getElementById('dm-title').textContent = r.title;
+  document.getElementById('dm-badges').innerHTML = statusBadge(r.status)+' '+typeBadge(r.types);
+  const isShipper = currentRole==='shipper';
+  document.getElementById('dm-body').innerHTML = `
+    <div class="g2" style="margin-bottom:20px;">
+      <div><div class="card-title">📋 RFQ Details</div>
+        <div class="info-row"><div class="ir-lbl">RFQ ID</div><div class="ir-val" style="font-family:monospace">${r.id}</div></div>
+        <div class="info-row"><div class="ir-lbl">Cargo Type</div><div class="ir-val">${r.cargo}</div></div>
+        <div class="info-row"><div class="ir-lbl">Mode</div><div class="ir-val">${r.mode}</div></div>
+        <div class="info-row"><div class="ir-lbl">Quantity</div><div class="ir-val">${r.qty}</div></div>
+        <div class="info-row"><div class="ir-lbl">Origin</div><div class="ir-val">${r.origin}</div></div>
+        <div class="info-row"><div class="ir-lbl">Destination</div><div class="ir-val">${r.dest}</div></div>
+        <div class="info-row"><div class="ir-lbl">Delivery By</div><div class="ir-val">${r.delivery}</div></div>
+        <div class="info-row"><div class="ir-lbl">Budget</div><div class="ir-val" style="color:var(--blue);font-family:'Playfair Display',serif;font-size:18px;">₹${fmtNum(r.budget)}</div></div>
+      </div>
+      <div><div class="card-title">⏱ Bid Conditions</div>
+        <div class="info-row"><div class="ir-lbl">Bidding Closes</div><div class="ir-val">${r.closeAt?.replace('T',' ')}</div></div>
+        <div class="info-row"><div class="ir-lbl">Auction Type</div><div class="ir-val">${r.auction}</div></div>
+        <div class="info-row"><div class="ir-lbl">Evaluation</div><div class="ir-val">${r.eval}</div></div>
+        <div class="info-row"><div class="ir-lbl">Payment Terms</div><div class="ir-val">${r.payment}</div></div>
+        <div class="info-row"><div class="ir-lbl">Penalty</div><div class="ir-val">${r.penalty}</div></div>
+        <div class="info-row"><div class="ir-lbl">Contract</div><div class="ir-val">${r.contract}</div></div>
+        <div class="info-row"><div class="ir-lbl">Re-Bidding</div><div class="ir-val">${r.rebid?'✅ Allowed':'❌ Not allowed'}</div></div>
+        <div class="info-row"><div class="ir-lbl">Counter Offers</div><div class="ir-val">${r.counter?'✅ Allowed':'❌ Not allowed'}</div></div>
+        <div class="info-row"><div class="ir-lbl">Anonymous</div><div class="ir-val">${r.anon?'✅ Yes':'No'}</div></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:14px;"><div class="card-title">✅ Eligibility Conditions</div>
+      <div class="conditions-wrap">${(r.conditions||[]).map(c=>`<div class="cond-chip filled"><span class="cc-icon">✓</span>${c}</div>`).join('')}</div>
+    </div>
+    <div style="margin-bottom:14px;"><div class="card-title">⏰ Time Remaining</div>${countdownHTML(r.closeAt)}</div>
+    ${isShipper&&r.bids.length?`<div class="divider"></div><div class="card-title">📥 Bids Summary (${r.bids.length} received)</div>
+    <table class="bid-table"><thead><tr><th>Rank</th><th>Vendor</th><th>Amount</th><th>Transit</th><th>Rating</th><th>Action</th></tr></thead>
+    <tbody>${[...r.bids].sort((a,b)=>a.amount-b.amount).map((b,i)=>`<tr class="${i===0?'best-bid':''}"><td><div class="bid-rank rank-${Math.min(i+1,4)}">${i+1}</div></td><td>${b.vendor}</td><td style="font-weight:700">₹${fmtNum(b.amount)}</td><td>${b.transit}</td><td>⭐${b.rating}</td><td><button class="btn btn-gold btn-sm" onclick="awardBid('${r.id}','${b.vc}','${b.vendor}',${b.amount});closeModal('rfqDetailModal')">🏆 Award</button></td></tr>`).join('')}</tbody></table>`:''}`;
+  document.getElementById('dm-foot').innerHTML = isShipper
+    ? `<button class="btn btn-ghost" onclick="closeModal('rfqDetailModal')">Close</button>
+       <button class="btn btn-ghost" onclick="toast2('RFQ extended by 48 hours','ts')">⏱ Extend Deadline</button>
+       <button class="btn btn-danger btn-sm" onclick="toast2('RFQ cancelled','te')">Cancel RFQ</button>
+       <button class="btn btn-primary" onclick="navTo('bids-received',null);closeModal('rfqDetailModal')">View All Bids →</button>`
+    : `<button class="btn btn-ghost" onclick="closeModal('rfqDetailModal')">Close</button>
+       <button class="btn btn-primary" onclick="closeModal('rfqDetailModal');openBidModal('${r.id}')">🎯 Place Bid</button>`;
+  openModal('rfqDetailModal');
+}
+
+/* ═══ BID MODAL ═══ */
+function openBidModal(id) {
+  const r = RFQs.find(x=>x.id===id);
+  if(!r) return;
+  currentRFQForBid = r;
+  document.getElementById('bm-rfq-title').textContent = r.id+' — '+r.title;
+  document.getElementById('bm-countdown').innerHTML = countdownHTML(r.closeAt);
+  // Set default valid date
+  const d=new Date(); d.setDate(d.getDate()+30);
+  document.getElementById('bid-valid').value=d.toISOString().split('T')[0];
+  openModal('bidModal');
+}
+
+function submitBid() {
+  const amount=document.getElementById('bid-amount').value;
+  const transit=document.getElementById('bid-transit').value;
+  const remarks=document.getElementById('bid-remarks').value;
+  if(!amount||!transit) return toast2('⚠️ Bid amount and transit time are required','te');
+  const r=currentRFQForBid;
+  if(r) {
+    r.bids.push({vendor:ROLES[currentRole].name,vc:ROLES[currentRole].vc,role:currentRole,amount:parseInt(amount),transit,rating:4.8,time:new Date().toLocaleString('en-IN'),remarks:remarks||'Competitive bid'});
+  }
+  closeModal('bidModal');
+  toast2(`🎯 Bid of ₹${fmtNum(amount)} submitted successfully! You'll be notified of the result.`,'ts');
+}
+
+/* ═══ CREATE RFQ ═══ */
+let rfqTabIdx=0;
+function rfqTab(i,btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.rfq-tab-panel').forEach((p,idx)=>p.style.display=idx===i?'block':'none');
+  rfqTabIdx=i;
+}
+
+function saveRFQDraft() {
+  closeModal('createRFQModal');
+  const newR={id:`RFQ-2024-00${RFQs.length+1}`,title:document.getElementById('rfq-title').value||'Draft RFQ',cargo:document.getElementById('rfq-cargo').value||'General',mode:document.getElementById('rfq-mode').value||'Road',qty:document.getElementById('rfq-qty').value||'TBD',origin:document.getElementById('rfq-origin').value||'TBD',dest:document.getElementById('rfq-dest').value||'TBD',delivery:document.getElementById('rfq-delivery').value||'TBD',budget:parseInt(document.getElementById('rfq-budget').value)||0,status:'draft',types:['supplier','transporter','forwarder'],openAt:document.getElementById('rfq-open').value||new Date().toISOString(),closeAt:document.getElementById('rfq-close').value||new Date(Date.now()+7*864e5).toISOString(),auction:document.getElementById('rfq-auction').value||'Sealed Bid',eval:document.getElementById('rfq-eval').value||'Lowest Price (L1)',payment:document.getElementById('rfq-payment').value||'30% Advance + 70% on Delivery',conditions:[],bids:[],penalty:'',contract:'One-time',rebid:false,counter:false,anon:false};
+  RFQs.unshift(newR);
+  renderMyRFQs();
+  toast2('💾 RFQ saved as draft','ti');
+}
+
+function publishRFQ() {
+  const title=document.getElementById('rfq-title').value;
+  if(!title) return toast2('⚠️ RFQ title is required','te');
+  closeModal('createRFQModal');
+  const types=[];
+  if(document.getElementById('v-supplier')?.checked) types.push('supplier');
+  if(document.getElementById('v-transporter')?.checked) types.push('transporter');
+  if(document.getElementById('v-forwarder')?.checked) types.push('forwarder');
+  const conditions=[];
+  if(document.getElementById('c-gst')?.checked) conditions.push('GST Registered');
+  if(document.getElementById('c-iso')?.checked) conditions.push('ISO Certified');
+  if(document.getElementById('c-exp')?.checked) conditions.push('Min 3 Years Experience');
+  if(document.getElementById('c-rating')?.checked) conditions.push('Min 4★ Rating');
+  if(document.getElementById('c-ins')?.checked) conditions.push('Cargo Insurance Mandatory');
+  const newR={id:`RFQ-2024-00${RFQs.length+1}`,title,cargo:document.getElementById('rfq-cargo').value||'General',mode:document.getElementById('rfq-mode').value||'Road',qty:document.getElementById('rfq-qty').value||'TBD',origin:document.getElementById('rfq-origin').value||'TBD',dest:document.getElementById('rfq-dest').value||'TBD',delivery:document.getElementById('rfq-delivery').value||'TBD',budget:parseInt(document.getElementById('rfq-budget').value)||0,status:'open',types:types.length?types:['supplier','transporter','forwarder'],openAt:document.getElementById('rfq-open').value||new Date().toISOString(),closeAt:document.getElementById('rfq-close').value||new Date(Date.now()+7*864e5).toISOString(),auction:document.getElementById('rfq-auction').value||'Sealed Bid',eval:document.getElementById('rfq-eval').value||'Lowest Price (L1)',payment:document.getElementById('rfq-payment').value||'30% Advance + 70% on Delivery',conditions,bids:[],penalty:document.getElementById('rfq-penalty')?.value||'',contract:document.getElementById('rfq-contract')?.value||'One-time',rebid:document.getElementById('bc-rebid')?.checked||false,counter:document.getElementById('bc-counter')?.checked||false,anon:document.getElementById('bc-anon')?.checked||false};
+  RFQs.unshift(newR);
+  renderMyRFQs();
+  renderDashLiveRFQs();
+  document.getElementById('nb-rfqs').textContent = RFQs.filter(r=>r.status!=='closed').length;
+  toast2(`📤 RFQ published! Broadcast to ${types.join(', ')||'all vendors'}. ${types.length*12} vendors notified.`,'ts');
+}
+
+/* ═══ MODAL ═══ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+/* ═══ HELPERS ═══ */
+function fmtNum(n){return Number(n).toLocaleString('en-IN');}
+function toast2(msg,cls='ts'){const t=document.getElementById('toast');document.getElementById('tmsg').textContent=msg;t.className='toast '+cls+' show';setTimeout(()=>t.classList.remove('show'),5000);}
+
+/* ═══ INIT ═══ */
+renderDashLiveRFQs();
+renderMyRFQs();
+renderOpenRFQs();
+renderNotifs();
+
+// Set default dates for RFQ form
+const now=new Date(),close=new Date(Date.now()+7*864e5);
+try{document.getElementById('rfq-open').value=now.toISOString().slice(0,16);document.getElementById('rfq-close').value=close.toISOString().slice(0,16);}catch(e){}
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+/* ════════════════════ AUTH DB ENGINE ════════════════════ */
+let _db;
+async function initDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('ProcureXDB_v5', 1);
+    r.onerror = () => rej(r.error);
+    r.onsuccess = () => { _db = r.result; res(_db); };
+    r.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('users')) {
+        const u = d.createObjectStore('users', { keyPath: 'id', autoIncrement: true });
+        u.createIndex('email', 'email', { unique: true });
+        u.createIndex('vendorCode', 'vendorCode', { unique: true });
+      }
+      if (!d.objectStoreNames.contains('logins')) {
+        const l = d.createObjectStore('logins', { keyPath: 'id', autoIncrement: true });
+        l.createIndex('uid', 'uid', { unique: false });
+      }
+    };
+  });
+}
+const _TX = (s, m='readonly') => _db.transaction(s, m).objectStore(s);
+const _add = (s, d) => new Promise((r, j) => { const q = _TX(s,'readwrite').add(d); q.onsuccess = () => r(q.result); q.onerror = () => j(q.error); });
+const _idx = (s, i, v) => new Promise((r, j) => { const q = _TX(s).index(i).get(v); q.onsuccess = () => r(q.result||null); q.onerror = () => j(q.error); });
+const _allIdx = (s, i, v) => new Promise((r, j) => { const q = _TX(s).index(i).getAll(IDBKeyRange.only(v)); q.onsuccess = () => r(q.result); q.onerror = () => j(q.error); });
+async function _hash(p) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p + 'PX_SALT_2024'));
+  return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const _genTok = u => btoa(JSON.stringify({ id: u.id, role: u.role, ts: Date.now() }));
+const _parseTok = t => { try { return JSON.parse(atob(t)); } catch { return null; } };
+
+/* SESSION */
+let _CU = null;
+const _saveS = (u, t) => { sessionStorage.setItem('px_tok', t); sessionStorage.setItem('px_u', JSON.stringify(u)); };
+const _clearS = () => { sessionStorage.removeItem('px_tok'); sessionStorage.removeItem('px_u'); _CU = null; };
+function _getS() {
+  const t = sessionStorage.getItem('px_tok'), u = sessionStorage.getItem('px_u');
+  if (t && u) { const p = _parseTok(t); if (p && Date.now() - p.ts < 8 * 3600000) return { u: JSON.parse(u) }; }
+  return null;
+}
+
+/* AUTH UI STATE */
+const _RL = { shipper: 'Shipper', supplier: 'Supplier', transporter: 'Transporter', forwarder: 'Freight Forwarder' };
+const _RC = { shipper: 'absh', supplier: 'absu', transporter: 'abtr', forwarder: 'abff' };
+let _siR = 'shipper', _suR = 'shipper';
+
+function siRole(el) {
+  document.querySelectorAll('#siTabs .rtab2').forEach(b => b.classList.remove('on'));
+  el.classList.add('on'); _siR = el.dataset.r;
+  const b = document.getElementById('siBtn');
+  b.className = 'abtn ' + _RC[_siR];
+  b.textContent = `Sign In as ${_RL[_siR]} →`;
+}
+function suRole(el) {
+  document.querySelectorAll('#suTabs .surole').forEach(b => b.classList.remove('on'));
+  el.classList.add('on'); _suR = el.dataset.sr;
+  const b = document.getElementById('suBtn');
+  b.className = 'abtn ' + _RC[_suR];
+  b.textContent = `Create ${_RL[_suR]} Account →`;
+}
+function swAuth(m) {
+  document.querySelectorAll('.auth-pill').forEach((p, i) => p.classList.toggle('on', (m==='si'&&i===0)||(m==='su'&&i===1)));
+  document.getElementById('siCard').classList.toggle('on', m==='si');
+  document.getElementById('suCard').classList.toggle('on', m==='su');
+}
+function atpw(id, btn) { const i = document.getElementById(id); const t = i.type==='text'; i.type = t ? 'password' : 'text'; btn.textContent = t ? '👁' : '🙈'; }
+function _ahid(id) { const e = document.getElementById(id); if (e) { e.textContent=''; e.classList.remove('on'); } }
+function _ashm(id, msg, cls) { const e = document.getElementById(id); e.textContent = msg; e.className = 'amsg ' + cls + ' on'; }
+function _aload(b, txt='') { document.getElementById('aov').classList.toggle('show', b); if (txt) document.getElementById('aovtxt').textContent = txt; }
+function _getBr() { const ua = navigator.userAgent; if (/Mobile/.test(ua)) return 'Mobile'; if (/Chrome/.test(ua)) return 'Chrome'; if (/Firefox/.test(ua)) return 'Firefox'; if (/Safari/.test(ua)) return 'Safari'; return 'Web'; }
+
+/* SIGN IN */
+async function doSignIn() {
+  _ahid('siErr');
+  const mob = (document.getElementById('siMob')?.value || '').trim();
+  const vc = (document.getElementById('siVc')?.value || '').trim();
+  const pw = (document.getElementById('siPw')?.value || '').trim();
+  if (!mob || !vc || !pw) return _ashm('siErr', '⚠️ All fields are required', 'amerr');
+  _aload(true, 'Authenticating…');
+  try {
+    let u = await _idx('users', 'vendorCode', vc);
+    if (!u && mob.includes('@')) u = await _idx('users', 'email', mob);
+    if (!u) { _aload(false); return _ashm('siErr', '❌ Account not found. Please sign up first.', 'amerr'); }
+    if (u.role !== _siR) { _aload(false); return _ashm('siErr', `❌ Registered as ${_RL[u.role]}. Please select the correct role.`, 'amerr'); }
+    const ph = await _hash(pw);
+    if (ph !== u.passwordHash) { _aload(false); return _ashm('siErr', '❌ Incorrect password. Try again.', 'amerr'); }
+    await _add('logins', { uid: u.id, role: u.role, vc: u.vendorCode, at: new Date().toISOString(), dev: _getBr(), ev: 'login' });
+    const tok = _genTok(u); _saveS(u, tok); _CU = u;
+    _aload(false);
+    toast2(`✅ Welcome back, ${u.name.split(' ')[0]}!`, 'ts');
+    _enterPortal(u);
+  } catch(e) { _aload(false); _ashm('siErr', '❌ ' + e.message, 'amerr'); }
+}
+
+/* SIGN UP */
+async function doSignUp() {
+  _ahid('suErr'); _ahid('suOk');
+  const nm = (document.getElementById('suNm')?.value||'').trim();
+  const mob = (document.getElementById('suMob')?.value||'').trim();
+  const em = (document.getElementById('suEm')?.value||'').trim();
+  const vc = (document.getElementById('suVc')?.value||'').trim();
+  const co = (document.getElementById('suCo')?.value||'').trim();
+  const gst = (document.getElementById('suGst')?.value||'').trim();
+  const pan = (document.getElementById('suPan')?.value||'').trim();
+  const adr = (document.getElementById('suAdr')?.value||'').trim();
+  const ct = (document.getElementById('suCt')?.value||'').trim();
+  const pin = (document.getElementById('suPin')?.value||'').trim();
+  const st = (document.getElementById('suSt')?.value||'').trim();
+  const ctr = (document.getElementById('suCtr')?.value||'India').trim();
+  const pw = (document.getElementById('suPw')?.value||'').trim();
+  const pw2 = (document.getElementById('suPw2')?.value||'').trim();
+  if (!nm||!mob||!em||!vc||!adr||!ct||!pin||!st||!pw) return _ashm('suErr','⚠️ Fill all required fields (marked *)','amerr');
+  if (!/^\d{10}$/.test(mob)) return _ashm('suErr','⚠️ Mobile must be exactly 10 digits (numbers only)','amerr');
+  if (!/\S+@\S+\.\S+/.test(em)) return _ashm('suErr','⚠️ Enter a valid email address','amerr');
+  if (!/^\d{6}$/.test(pin)) return _ashm('suErr','⚠️ Pincode must be exactly 6 digits','amerr');
+  if (pw.length < 8) return _ashm('suErr','⚠️ Password must be at least 8 characters','amerr');
+  if (pw !== pw2) return _ashm('suErr','⚠️ Passwords do not match','amerr');
+  _aload(true,'Creating account…');
+  try {
+    if (await _idx('users','email',em)) { _aload(false); return _ashm('suErr','❌ This email is already registered. Sign in instead.','amerr'); }
+    if (await _idx('users','vendorCode',vc)) { _aload(false); return _ashm('suErr','❌ This Vendor Code is already taken. Use a unique code.','amerr'); }
+    const ph = await _hash(pw);
+    const uid = await _add('users', { role:_suR, name:nm, mobile:mob, cc:document.getElementById('suCc').value, email:em, vendorCode:vc, company:co, gst, pan, address:adr, city:ct, pincode:pin, state:st, country:ctr, passwordHash:ph, createdAt:new Date().toISOString(), isActive:true });
+    await _add('logins', { uid, role:_suR, vc, at:new Date().toISOString(), dev:_getBr(), ev:'signup' });
+    _aload(false);
+    _ashm('suOk', `✅ Account created! Vendor ID: #${uid}. Please sign in.`, 'amok');
+    toast2(`🎉 Welcome, ${nm.split(' ')[0]}! Account saved.`, 'ts');
+    setTimeout(() => swAuth('si'), 2600);
+  } catch(e) { _aload(false); _ashm('suErr','❌ ' + e.message,'amerr'); }
+}
+
+/* ENTER PORTAL — configure the RFQ system based on logged-in user */
+function _enterPortal(u) {
+  document.getElementById('authScr').classList.add('hidden');
+  // Update sidebar user card
+  document.getElementById('sbRoleName').textContent = u.company || u.name;
+  const roleLabels = { shipper:'📦 Shipper', supplier:'🏭 Supplier', transporter:'🚛 Transporter', forwarder:'✈️ Frt. Forwarder' };
+  const roleColors = { shipper:'var(--sh)', supplier:'var(--su)', transporter:'var(--tr)', forwarder:'var(--ff)' };
+  document.getElementById('sbRoleLabel').textContent = roleLabels[u.role];
+  document.getElementById('sbRoleLabel').style.color = roleColors[u.role];
+  document.getElementById('sbRoleVC').textContent = u.vendorCode;
+  document.getElementById('sbUserName').textContent = u.name;
+  document.getElementById('sbAv').textContent = u.name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  document.getElementById('sbUserRole').textContent = _RL[u.role] + ' · ' + (u.city || '');
+  // Show/hide nav sections based on role
+  if (u.role === 'shipper') {
+    document.getElementById('shipperNav').style.display = '';
+    document.getElementById('vendorNav').style.display = 'none';
+    document.getElementById('dash-shipper').style.display = '';
+    document.getElementById('dash-vendor').style.display = 'none';
+  } else {
+    document.getElementById('shipperNav').style.display = 'none';
+    document.getElementById('vendorNav').style.display = '';
+    document.getElementById('dash-shipper').style.display = 'none';
+    document.getElementById('dash-vendor').style.display = '';
+    renderVendorDashboard(u.role);
+    renderOpenRFQs();
+  }
+  // Set logout to actually log out
+  document.querySelector('.sb-nav .nav-item:last-child').onclick = () => {
+    _clearS();
+    document.getElementById('authScr').classList.remove('hidden');
+    toast2('👋 Logged out successfully', 'ti');
+  };
+  // Sync role switcher
+  document.querySelectorAll('.rs-btn').forEach(b => b.classList.remove('active'));
+  const rsBtns = { shipper:'.rs-sh', supplier:'.rs-su', transporter:'.rs-tr', forwarder:'.rs-ff' };
+  document.querySelector(rsBtns[u.role])?.classList.add('active');
+  currentRole = u.role;
+  ROLES[u.role] = { ...ROLES[u.role], name: u.company || u.name, vc: u.vendorCode, city: u.city || 'India' };
+  renderDashLiveRFQs();
+  renderProfile();
+}
+
+/* MOBILE INPUT: strip non-digits */
+document.addEventListener('DOMContentLoaded', () => {
+  const mob = document.getElementById('suMob');
+  if (mob) {
+    mob.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+  }
+  const pin = document.getElementById('suPin');
+  if (pin) {
+    pin.addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 6);
+    });
+  }
+});
+
+/* BOOT */
+(async () => {
+  try {
+    await initDB();
+    document.getElementById('adot').classList.add('ok');
+    document.getElementById('adbtxt').textContent = 'DB Connected';
+    setTimeout(() => { const d = document.getElementById('adb'); if (d) d.style.opacity = '.4'; }, 3500);
+    // Check for existing session
+    const s = _getS();
+    if (s) {
+      _CU = s.u;
+      toast2(`✅ Session restored — ${s.u.name}`, 'ts');
+      _enterPortal(s.u);
+    }
+  } catch(e) {
+    document.getElementById('adbtxt').textContent = 'DB Error';
+    console.error(e);
+  }
+})();
+
+</script>
+</body>
+</html>
