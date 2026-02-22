@@ -788,13 +788,48 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
       <div class="ag2">
         <div class="afg afc"><label>Full Name <span class="areq">*</span></label><input type="text" id="suNm" placeholder="e.g. Ramesh Kumar Sharma" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
         <!-- MOBILE NUMBER — FIXED -->
-        <div class="afg afc">
-          <label>Mobile Number <span class="areq">*</span></label>
-          <div class="ph-row">
-            <select class="cc-sel" id="suCc"><option value="+91">🇮🇳 +91</option><option value="+1">🇺🇸 +1</option><option value="+971">🇦🇪 +971</option><option value="+44">🇬🇧 +44</option></select>
-            <input class="ph-in" type="tel" id="suMob" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" pattern="[0-9]{10}" autocomplete="tel">
-          </div>
-        </div>
+        <!-- MOBILE NUMBER -->
+<div class="afg afc">
+  <label>Mobile Number <span class="areq">*</span></label>
+  <div class="ph-row">
+    <select class="cc-sel" id="suCc">
+      <option value="+91">🇮🇳 +91</option>
+      <option value="+1">🇺🇸 +1</option>
+      <option value="+971">🇦🇪 +971</option>
+      <option value="+44">🇬🇧 +44</option>
+    </select>
+    <input class="ph-in" type="tel" id="suMob" placeholder="Enter mobile number" maxlength="10" inputmode="numeric" pattern="[0-9]{10}" autocomplete="tel">
+  </div>
+</div>
+
+<style>
+/* Container row */
+.ph-row {
+  display: flex;
+  gap: 8px;          /* space between select and input */
+  align-items: center;
+}
+
+/* Country code dropdown */
+.cc-sel {
+  flex: 0 0 90px;    /* fixed width for country code */
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Phone input field */
+.ph-in {
+  flex: 1;           /* take remaining space */
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+</style>
         <div class="afg afc"><label>Email ID <span class="areq">*</span></label><input type="email" id="suEm" placeholder="yourname@company.com" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;font-family:'Outfit',sans-serif;font-size:14px;color:#0f172a;outline:none;transition:all .2s;width:100%;"></div>
       </div>
       <div class="asechead">🏢 Business</div>
